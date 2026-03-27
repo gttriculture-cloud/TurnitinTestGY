@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Score Check Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #16161f;
+    --border: #1e1e2e;
+    --accent: #f5c842;
+    --accent2: #ff6b35;
+    --text: #e8e8f0;
+    --muted: #6b6b80;
+    --success: #4ade80;
+    --error: #f87171;
+    --info: #60a5fa;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 2.5rem 1rem 4rem;
+    overflow-x: hidden;
+    position: relative;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 40% at 80% 5%, rgba(245,200,66,0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 50% at 10% 80%, rgba(255,107,53,0.05) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.012) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.012) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .container {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 580px;
+  }
+  header { margin-bottom: 2rem; animation: fadeDown 0.5s ease both; }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: rgba(245,200,66,0.1);
+    border: 1px solid rgba(245,200,66,0.25);
+    color: var(--accent);
+    font-size: 0.63rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 0.3rem 0.75rem;
+    border-radius: 2px;
+    margin-bottom: 1rem;
+  }
+  .badge::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: blink 2s infinite;
+  }
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(1.9rem, 6vw, 2.8rem);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+  }
+  h1 span { color: var(--accent); }
+  .subtitle { margin-top: 0.5rem; color: var(--muted); font-size: 0.78rem; }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1.75rem;
+    margin-bottom: 1rem;
+    position: relative;
+    overflow: hidden;
+    animation: fadeUp 0.5s ease 0.1s both;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+  }
+  .card-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1.25rem;
+  }
+  .field { margin-bottom: 1.25rem; }
+  .field:last-child { margin-bottom: 0; }
+  label {
+    display: block;
+    font-size: 0.66rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.45rem;
+  }
+  label span { color: var(--accent2); }
+  input[type="text"], input[type="email"] {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.87rem;
+    padding: 0.68rem 1rem;
+    border-radius: 4px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  input[type="text"]:focus, input[type="email"]:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(245,200,66,0.08);
+  }
+  input::placeholder { color: var(--muted); opacity: 0.5; }
+  .service-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0.6rem;
+  }
+  .service-option { position: relative; cursor: pointer; }
+  .service-option input[type="radio"] { position: absolute; opacity: 0; pointer-events: none; }
+  .service-card {
+    border: 1.5px solid var(--border);
+    border-radius: 4px;
+    padding: 1rem 0.75rem;
+    text-align: center;
+    background: var(--surface2);
+    transition: border-color 0.2s, background 0.2s;
+    cursor: pointer;
+    user-select: none;
+  }
+  .service-card:hover { border-color: rgba(245,200,66,0.4); }
+  .service-option input:checked + .service-card {
+    border-color: var(--accent);
+    background: rgba(245,200,66,0.07);
+  }
+  .service-icon { font-size: 1.4rem; margin-bottom: 0.4rem; }
+  .service-name { font-family: 'Syne', sans-serif; font-size: 0.72rem; font-weight: 700; color: var(--text); margin-bottom: 0.25rem; }
+  /* Improved price font on service cards */
+  .service-price {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 0.3rem;
+    letter-spacing: 0.02em;
+  }
+  .service-tag { font-size: 0.58rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); background: rgba(255,255,255,0.05); border-radius: 2px; padding: 0.15rem 0.4rem; display: inline-block; margin-bottom: 0.6rem; }
+  .service-tag-featured { color: var(--accent2); background: rgba(255,107,53,0.1); }
+  .service-card-disabled {
+    cursor: not-allowed !important;
+    pointer-events: none;
+    border-color: var(--border) !important;
+    background: rgba(255,255,255,0.02) !important;
+  }
+  .service-option:has(input:disabled) { cursor: not-allowed; pointer-events: none; }
+  .service-card-featured { border-color: rgba(245,200,66,0.35) !important; position: relative; }
+  .service-badge-top { font-size: 0.55rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.3rem; }
+  .service-features { list-style: none; text-align: left; font-size: 0.62rem; color: var(--muted); line-height: 1.7; margin-top: 0.2rem; }
+  .service-features li { display: flex; align-items: center; gap: 0.3rem; }
+  .feat-yes { color: var(--success) !important; }
+  .feat-no { color: var(--muted) !important; }
+  .feat-yes::before { content: '✓'; color: var(--success); font-weight: 700; }
+  .feat-no::before { content: '✕'; color: var(--muted); }
+  .priority-addon {
+    background: rgba(245,200,66,0.05);
+    border: 1.5px dashed rgba(245,200,66,0.3);
+    border-radius: 6px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1rem;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .priority-addon:hover { border-color: rgba(245,200,66,0.55); background: rgba(245,200,66,0.08); }
+  .priority-addon-inner { display: flex; align-items: flex-start; gap: 0.75rem; }
+  .priority-addon input[type="checkbox"] { margin-top: 0.15rem; accent-color: var(--accent); width: 15px; height: 15px; flex-shrink: 0; cursor: pointer; }
+  .priority-addon-text { font-size: 0.77rem; line-height: 1.6; }
+  .priority-addon-title { font-family: 'Syne', sans-serif; font-weight: 700; color: var(--accent); font-size: 0.8rem; }
+  .priority-addon-desc { color: var(--muted); font-size: 0.7rem; margin-top: 0.1rem; }
+  .file-drop {
+    border: 1.5px dashed var(--border);
+    border-radius: 4px;
+    padding: 1.25rem;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    background: var(--surface2);
+    position: relative;
+  }
+  .file-drop:hover, .file-drop.dragover { border-color: var(--accent); background: rgba(245,200,66,0.04); }
+  .file-drop input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; z-index: 2; }
+  .file-label { font-size: 0.76rem; color: var(--muted); }
+  .file-label strong { color: var(--accent); font-weight: 500; }
+  .file-chosen { display: none; margin-top: 0.6rem; font-size: 0.74rem; color: var(--success); }
+  .file-chosen.visible { display: block; }
+  .promo-row { display: flex; gap: 0.5rem; }
+  .promo-row input { flex: 1; }
+  .promo-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    padding: 0 1.1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+    white-space: nowrap;
+  }
+  .promo-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .promo-msg { margin-top: 0.4rem; font-size: 0.7rem; display: none; }
+  .promo-msg.ok { color: var(--success); display: block; }
+  .promo-msg.bad { color: var(--error); display: block; }
+  .summary-card {
+    background: rgba(245,200,66,0.04);
+    border: 1px solid rgba(245,200,66,0.18);
+    border-radius: 6px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1rem;
+    animation: fadeUp 0.4s ease both;
+  }
+  .summary-title { font-family: 'Syne', sans-serif; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 1rem; }
+  .summary-row { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text); margin-bottom: 0.5rem; }
+  .summary-row.muted { color: var(--muted); font-size: 0.75rem; }
+  .summary-row.discount { color: var(--success); }
+  .summary-divider { height: 1px; background: rgba(245,200,66,0.15); margin: 0.75rem 0; }
+  .summary-total { display: flex; justify-content: space-between; align-items: baseline; }
+  .total-label { font-family: 'Syne', sans-serif; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.05em; }
+  /* Improved total amount font */
+  .total-amount {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.7rem;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 0.01em;
+  }
+  .total-currency { font-size: 0.8rem; color: var(--muted); margin-left: 0.2rem; }
+  .pay-box {
+    background: var(--surface2);
+    border: 1px solid rgba(96,165,250,0.25);
+    border-radius: 6px;
+    padding: 1.4rem 1.5rem;
+    margin-bottom: 1rem;
+    animation: fadeUp 0.4s ease 0.05s both;
+  }
+  .pay-box-title { font-size: 0.66rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--info); margin-bottom: 0.75rem; }
+  /* Improved MMG number font — large, clear, spaced */
+  .pay-number {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 2.4rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--text);
+    margin-bottom: 0.4rem;
+  }
+  .pay-hint { font-size: 0.73rem; color: var(--muted); line-height: 1.7; }
+  .pay-hint strong { color: var(--accent); font-weight: 500; }
+  /* Improved payExact inline amount */
+  #payExact {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 1em;
+    color: var(--accent);
+    letter-spacing: 0.03em;
+  }
+  .mmg-wrapper {
+    display: flex;
+    align-items: stretch;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .mmg-wrapper:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(245,200,66,0.08); }
+  .mmg-prefix {
+    background: rgba(245,200,66,0.08);
+    border-right: 1px solid var(--border);
+    padding: 0.68rem 0.85rem;
+    font-size: 0.73rem;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+  }
+  .mmg-wrapper input { border: none !important; box-shadow: none !important; border-radius: 0; flex: 1; min-width: 0; }
+  .btn {
+    width: 100%;
+    background: var(--accent);
+    color: #0a0a0f;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.9rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+  .btn:hover:not(:disabled) { background: #ffd966; box-shadow: 0 0 28px rgba(245,200,66,0.3); transform: translateY(-1px); }
+  .btn:active:not(:disabled) { transform: translateY(0); }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .spinner { width: 15px; height: 15px; border: 2px solid rgba(0,0,0,0.25); border-top-color: #000; border-radius: 50%; animation: spin 0.6s linear infinite; display: none; }
+  .btn.loading .spinner { display: block; }
+  input.invalid { border-color: var(--error) !important; }
+  .file-drop.invalid { border-color: var(--error) !important; }
+  .service-err { color: var(--error); font-size: 0.68rem; margin-top: 0.4rem; display: none; }
+  .service-err.visible { display: block; }
+  .field-error { color: var(--error); font-size: 0.68rem; margin-top: 0.35rem; display: none; }
+  .field-error.visible { display: block; }
+
+  /* Terms of Service checkbox row */
+  .tos-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.65rem;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.85rem 1rem;
+    margin-bottom: 1rem;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .tos-row:hover { border-color: rgba(245,200,66,0.35); }
+  .tos-row input[type="checkbox"] {
+    margin-top: 0.15rem;
+    accent-color: var(--accent);
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+  .tos-text {
+    font-size: 0.75rem;
+    color: var(--muted);
+    line-height: 1.6;
+    user-select: none;
+  }
+  .tos-link {
+    color: var(--info);
+    text-decoration: underline;
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-family: inherit;
+    font-size: inherit;
+    padding: 0;
+    transition: color 0.15s;
+  }
+  .tos-link:hover { color: #93c5fd; }
+  .tos-err { color: var(--error); font-size: 0.68rem; margin-top: 0.35rem; margin-bottom: 0.5rem; display: none; }
+  .tos-err.visible { display: block; }
+
+  /* ToS Modal */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(4px);
+    z-index: 300;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s;
+  }
+  .modal-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+  .modal {
+    background: var(--surface);
+    border: 1px solid rgba(245,200,66,0.2);
+    border-radius: 8px;
+    width: 100%;
+    max-width: 540px;
+    max-height: 82vh;
+    display: flex;
+    flex-direction: column;
+    transform: translateY(20px) scale(0.97);
+    transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1);
+    position: relative;
+    overflow: hidden;
+  }
+  .modal-overlay.open .modal {
+    transform: translateY(0) scale(1);
+  }
+  .modal::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+  }
+  .modal-header {
+    padding: 1.4rem 1.5rem 1rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .modal-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    color: var(--accent);
+  }
+  .modal-close {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.15s, border-color 0.15s;
+    flex-shrink: 0;
+  }
+  .modal-close:hover { color: var(--text); border-color: var(--muted); }
+  .modal-body {
+    padding: 1.25rem 1.5rem 1.5rem;
+    overflow-y: auto;
+    font-size: 0.78rem;
+    line-height: 1.85;
+    color: var(--muted);
+    flex: 1;
+  }
+  .modal-body h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text);
+    margin-top: 1.1rem;
+    margin-bottom: 0.45rem;
+  }
+  .modal-body h3:first-child { margin-top: 0; }
+  .modal-body p { margin-bottom: 0.6rem; }
+  .modal-body strong { color: var(--text); font-weight: 500; }
+  .modal-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .modal-accept-btn {
+    width: 100%;
+    background: var(--accent);
+    color: #0a0a0f;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.75rem 1rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .modal-accept-btn:hover { background: #ffd966; }
+
+  .toast {
+    position: fixed;
+    bottom: 2rem;
+    right: 1.5rem;
+    padding: 0.8rem 1.1rem;
+    border-radius: 5px;
+    font-size: 0.78rem;
+    transform: translateY(120%);
+    transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+    z-index: 200;
+    max-width: 300px;
+    line-height: 1.5;
+  }
+  .toast.show { transform: translateY(0); }
+  .toast.success { background: rgba(74,222,128,0.12); border: 1px solid rgba(74,222,128,0.3); color: var(--success); }
+  .toast.error { background: rgba(248,113,113,0.12); border: 1px solid rgba(248,113,113,0.3); color: var(--error); }
+  .success-screen { display: none; text-align: center; padding: 3.5rem 1rem; animation: fadeUp 0.5s ease both; }
+  .success-screen.visible { display: block; }
+  .checkmark { width: 64px; height: 64px; background: rgba(74,222,128,0.1); border: 2px solid var(--success); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; margin: 0 auto 1.5rem; }
+  .success-screen h2 { font-family: 'Syne', sans-serif; font-size: 1.6rem; font-weight: 800; margin-bottom: 0.6rem; }
+  .success-screen p { color: var(--muted); font-size: 0.8rem; line-height: 1.8; max-width: 340px; margin: 0 auto; }
+  @keyframes fadeDown { from { opacity: 0; transform: translateY(-14px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+  @media (max-width: 420px) {
+    .service-grid { grid-template-columns: 1fr; }
+    .pay-number { font-size: 1.8rem; }
+    .modal { max-height: 90vh; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <div class="badge">Document Scoring Portal</div>
+    <h1>Get Your <span>Score Report</span></h1>
+    <p class="subtitle">AI detection &amp; plagiarism checks · Secure payment via MMG</p>
+  </header>
+
+  <!-- STEP 1: FORM -->
+  <div id="formSection">
+
+    <div class="card">
+      <div class="card-title">&#9312; Personal Information</div>
+      <div class="field">
+        <label>Full Name <span>*</span></label>
+        <input type="text" id="name" placeholder="Your full name" autocomplete="name"/>
+        <div class="field-error" id="nameErr">Please enter your full name.</div>
+      </div>
+      <div class="field">
+        <label>Email Address <span>*</span></label>
+        <input type="email" id="email" placeholder="you@example.com" autocomplete="email"/>
+        <div class="field-error" id="emailErr">Please enter a valid email address.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">&#9313; Select Service</div>
+      <div class="service-grid">
+        <label class="service-option">
+          <input type="radio" name="service" value="plagiarism" data-price="400" data-label="Plagiarism Report"/>
+          <div class="service-card">
+            <div class="service-icon">&#128269;</div>
+            <div class="service-name">Plagiarism</div>
+            <div class="service-price">$400 GYD</div>
+            <div class="service-tag">One-time</div>
+            <ul class="service-features">
+              <li class="feat-yes">Plagiarism Report</li>
+              <li class="feat-no">No AI Report</li>
+              <li class="feat-no">Limited Support</li>
+              <li class="feat-no">Low Priority</li>
+            </ul>
+          </div>
+        </label>
+        <label class="service-option">
+          <input type="radio" name="service" value="ai" data-price="500" data-label="AI Report" disabled/>
+          <div class="service-card service-card-disabled">
+            <div class="service-icon" style="opacity:0.4;">&#129302;</div>
+            <div class="service-name" style="opacity:0.4;">AI Score</div>
+            <div class="service-price" style="color:var(--accent2); font-size:0.7rem; letter-spacing:0.08em;">COMING SOON</div>
+            <div class="service-tag" style="opacity:0.4;">One-time</div>
+            <ul class="service-features" style="opacity:0.4;">
+              <li class="feat-yes">AI Report</li>
+              <li class="feat-no">No Plagiarism Report</li>
+              <li class="feat-no">Limited Support</li>
+              <li class="feat-no">Low Priority</li>
+            </ul>
+          </div>
+        </label>
+        <label class="service-option">
+          <input type="radio" name="service" value="both" data-price="700" data-label="AI + Plagiarism Bundle (Priority)" disabled/>
+          <div class="service-card service-card-featured service-card-disabled">
+            <div class="service-badge-top" style="opacity:0.4;">⭐ Best Value</div>
+            <div class="service-icon" style="opacity:0.4;">&#9889;</div>
+            <div class="service-name" style="opacity:0.4;">Both Scores</div>
+            <div class="service-price" style="color:var(--accent2); font-size:0.7rem; letter-spacing:0.08em;">COMING SOON</div>
+            <div class="service-tag service-tag-featured" style="opacity:0.4;">Includes Priority</div>
+            <div class="service-tag" style="margin-left:0.2rem; opacity:0.4;">One-time</div>
+            <ul class="service-features" style="opacity:0.4;">
+              <li class="feat-yes">Plagiarism Report</li>
+              <li class="feat-yes">AI Report</li>
+              <li class="feat-yes">Priority Support</li>
+              <li class="feat-yes">Higher Priority</li>
+            </ul>
+          </div>
+        </label>
+      </div>
+      <div class="service-err" id="serviceErr">Please select a service.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">&#9314; Upload Document</div>
+      <div class="file-drop" id="fileDrop">
+        <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.txt"/>
+        <div style="font-size:1.4rem; margin-bottom:0.35rem;">&#128196;</div>
+        <div class="file-label"><strong>Click to upload</strong> or drag &amp; drop</div>
+        <div class="file-label" style="font-size:0.68rem; margin-top:0.2rem;">PDF, DOC, DOCX, TXT &middot; Max 10 MB</div>
+        <div class="file-chosen" id="fileChosen"></div>
+      </div>
+      <div class="field-error" id="fileErr">Please upload your document.</div>
+      <div style="margin-top: 1rem; background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: 0.9rem 1rem; font-size: 0.72rem; color: var(--muted); line-height: 1.9;">
+        <div style="font-family: 'Syne', sans-serif; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text); margin-bottom: 0.5rem;">📋 File Requirements</div>
+        <div>• <strong style="color:var(--text);">Size:</strong> Maximum 10 MB.</div>
+        <div>• <strong style="color:var(--text);">Length:</strong> Maximum 800 pages.</div>
+        <div>• <strong style="color:var(--text);">Minimum Length:</strong> At least 20 words of text.</div>
+        <div>• <strong style="color:var(--text);">Content Type:</strong> Files must contain selectable text. Scanned files, image-only PDFs, or password-protected documents are not accepted.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">&#9315; Promo Code <span style="color:var(--muted); font-size:0.65rem; text-transform:none; font-weight:400; letter-spacing:0.02em;">(optional)</span></div>
+      <div class="promo-row">
+        <input type="text" id="promoInput" placeholder="ENTER-CODE"/>
+        <button class="promo-btn" onclick="applyPromo()">Apply</button>
+      </div>
+      <div class="promo-msg" id="promoMsg"></div>
+    </div>
+
+    <div style="background: rgba(255,107,53,0.08); border: 1px solid rgba(255,107,53,0.3); border-radius: 6px; padding: 1rem 1.25rem; margin-bottom: 1rem; font-size: 0.78rem; color: var(--text); line-height: 1.8;">
+      <div style="font-family: 'Syne', sans-serif; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent2); margin-bottom: 0.5rem;">⏳ Processing Time Notice</div>
+      After submission, your score report will be delivered to your email. Please allow anywhere from <strong>24 hours to 72 hours</strong> for processing, with longer waiting times if the volume remains high. Thank you for your patience.
+    </div>
+
+    <div style="background: rgba(96,165,250,0.06); border: 1px solid rgba(96,165,250,0.2); border-radius: 6px; padding: 1rem 1.25rem; margin-bottom: 1rem; font-size: 0.78rem; color: var(--text); line-height: 1.9;">
+      <div style="font-family: 'Syne', sans-serif; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--info); margin-bottom: 0.6rem;">📞 Need Help? Contact Us</div>
+      If something goes wrong or you need assistance, feel free to reach out:<br/>
+      <div style="margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.35rem;">
+        <span>✉️ <strong style="color:var(--text);">Email:</strong> <a id="contactEmail" href="#" style="color:var(--info); text-decoration:none;"></a></span>
+      </div>
+    </div>
+
+    <button class="btn" onclick="proceedToPayment()" style="margin-bottom:1rem;">
+      Review Order &amp; Pay &#8594;
+    </button>
+  </div>
+
+  <!-- STEP 2: PAYMENT -->
+  <div id="paySection" style="display:none;">
+
+    <div class="summary-card">
+      <div class="summary-title">&#128203; Order Summary</div>
+      <div class="summary-row muted"><span>Customer</span><span id="sumName">—</span></div>
+      <div class="summary-row muted"><span>Email</span><span id="sumEmail">—</span></div>
+      <div class="summary-row muted"><span>Document</span><span id="sumFile" style="max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">—</span></div>
+      <div class="summary-divider"></div>
+      <div class="summary-row"><span id="sumServiceLabel">Service</span><span id="sumBasePrice">—</span></div>
+      <div class="summary-row discount" id="discountRow" style="display:none;">
+        <span id="discountLabel">Promo discount</span>
+        <span id="discountAmt">—</span>
+      </div>
+      <div class="summary-row" id="roundingRow" style="display:none; color: var(--muted); font-size: 0.72rem;">
+        <span>Rounding adjustment</span>
+        <span id="roundingAmt">—</span>
+      </div>
+      <div class="summary-row" id="priorityRow" style="display:none; color: var(--accent);">
+        <span>⚡ Max Priority Add-on</span>
+        <span>+$1,000 GYD</span>
+      </div>
+      <div class="summary-divider"></div>
+      <div class="summary-total">
+        <span class="total-label">TOTAL DUE</span>
+        <span><span class="total-amount" id="sumTotal">—</span><span class="total-currency">GYD</span></span>
+      </div>
+    </div>
+
+    <div class="priority-addon" onclick="document.getElementById('priorityCheck').click(); event.stopPropagation();">
+      <div class="priority-addon-inner">
+        <input type="checkbox" id="priorityCheck" onchange="updatePriorityAddon()" onclick="event.stopPropagation()"/>
+        <div class="priority-addon-text">
+          <div class="priority-addon-title">⚡ Add Maximum Priority — +$1,000 GYD</div>
+          <div class="priority-addon-desc">Skip the queue and get your report processed first. Your submission will be treated as top priority, reducing wait time significantly. Please note wait times can still take up to 48 hours if volume is high.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pay-box">
+      <div class="pay-box-title">&#128179; Pay via MMG Mobile Money</div>
+      <div class="pay-number">7351955</div>
+      <div class="pay-hint">
+        Send exactly <strong id="payExact">—</strong> GYD to the number above via <strong>MMG (Guyana Mobile Money)</strong>.<br/>
+        After payment, enter your <strong>MMG Reference Number</strong> below to confirm.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">&#9316; Enter MMG Reference Number</div>
+      <div class="field">
+        <div class="mmg-wrapper">
+          <div class="mmg-prefix">MMG REF</div>
+          <input type="text" id="mmg" placeholder="Your transaction reference number"/>
+        </div>
+        <div class="field-error" id="mmgErr">Please enter your MMG reference number.</div>
+        <div style="margin-top: 0.6rem; background: rgba(248,113,113,0.08); border: 1px solid rgba(248,113,113,0.25); border-radius: 4px; padding: 0.6rem 0.85rem; font-size: 0.71rem; color: var(--error); line-height: 1.6;">
+          ⚠️ <strong>Make sure this is correct</strong>, as your payment will not be processed if the reference number is wrong.
+        </div>
+      </div>
+    </div>
+
+    <!-- Terms of Service agreement -->
+    <label class="tos-row" onclick="void(0)">
+      <input type="checkbox" id="tosCheck" onclick="event.stopPropagation()"/>
+      <span class="tos-text">
+        I have read and agree to the
+        <button class="tos-link" onclick="openTosModal(event)">Terms of Service</button>.
+        By submitting, I acknowledge the payment, refund, and usage policies.
+      </span>
+    </label>
+    <div class="tos-err" id="tosErr">You must agree to the Terms of Service to proceed.</div>
+
+    <div style="display:flex; gap:0.6rem;">
+      <button class="btn" onclick="backToForm()" style="background:var(--surface2); color:var(--text); border:1px solid var(--border); flex:0 0 auto; width:auto; padding:0.9rem 1.25rem;">&#8592; Back</button>
+      <button class="btn" id="submitBtn" onclick="handleSubmit()">
+        <div class="spinner"></div>
+        <span class="btn-text">Confirm &amp; Submit &#8594;</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- SUCCESS -->
+  <div class="card success-screen" id="successScreen">
+    <div class="checkmark">&#10003;</div>
+    <h2>Submission Received!</h2>
+    <p>Your payment and document have been submitted successfully.<br/>Your score report will be sent to <strong id="confirmEmail" style="color:var(--accent);">your email</strong>.<br/><br/><span style="color:var(--accent2);">⏳ Please note: Processing may take anywhere from <strong>24 hours to 72 hours</strong>, with longer waiting times if the volume remains high. Thank you for your patience!</span></p>
+  </div>
+</div>
+
+<!-- Terms of Service Modal -->
+<div class="modal-overlay" id="tosModal" onclick="closeTosModalOnOverlay(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">📄 Terms of Service</div>
+      <button class="modal-close" onclick="closeTosModal()">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <h3>Data Collection &amp; Privacy</h3>
+      <p>By using this service, you consent to us collecting your name, email address, and any information contained in the document you submit. This information is used solely for processing your order. <strong>We do not sell or share your data with any third parties.</strong> All information is stored securely on our servers. All checks are non-repository and will not be stored in any database.</p>
+
+      <h3>Refund Policy</h3>
+      <p><strong>All sales are final.</strong> Once payment is made and your document is submitted, it will be sent through our processing pipeline and no refunds will be issued.</p>
+      <p>If you paid too little, your order will not be processed unless you pay the remaining balance in a separate transaction. <strong>You must include both transaction reference numbers</strong> in the reference field for your payment to be accepted. If you paid a short balance and did not pay the remainder, you will <strong>not</strong> receive a refund. If you paid too much, your order will still be processed but the excess amount will <strong>not</strong> be refunded.</p>
+      <p>If you applied a promo code but had already paid the original (non-discounted) price, <strong>no refund will be issued</strong> — you must pay the full listed price.</p>
+      <p>Refunds are only considered in cases of a technical error or a mistake made on our end. All approved refunds are processed through MMG.</p>
+
+      <h3>Transaction ID Validity</h3>
+      <p>Once you have paid through MMG, your transaction ID is valid on our end for <strong>2 weeks (14 days)</strong> from the date of payment. After that period, the transaction ID expires and cannot be recovered. If your ID expires before you submit your order, you will need to pay again. Please submit your order promptly after completing payment.</p>
+
+      <h3>Fair Use &amp; Abuse</h3>
+      <p>This service is for personal use only. <strong>You may not use our reports for resale or for the benefit of third parties.</strong> Any abuse of this policy — including commercial resale or providing reports to others for profit — will result in your future transactions being ignored without refund.</p>
+      <p>Submitting excessive drafts or spamming our system creates backlogs for all users, including yourself. Repeated abuse will result in your submissions being ignored entirely.</p>
+
+      <h3>Disclaimer of Affiliation &amp; Intent</h3>
+      <p>We are not affiliated with any other Guyanese company, nor do we seek to bypass any system or platform for any purpose. We are simply offering a service that any person can rightfully pay for. Every person with a valid MMG account in Guyana has access to our services once payment has been made and the order submitted. Our intent is solely to provide access to certain reports for the public and not to harm any organization in any way. Any person who uses information obtained through our service for harmful or dishonest activities does so outside of our control, and should be addressed by their respective organization or through legal means if necessary.</p>
+
+      <h3>Disclaimer of Accuracy &amp; Liability</h3>
+      <p>We do not guarantee the accuracy, reliability, or results from the use of our services, including any reports generated. Our service is not responsible for any repercussions arising from the use of our product, including but not limited to academic dishonesty claims or institutional disciplinary actions. Use of our services is entirely at your own risk.</p>
+
+      <h3>Pricing</h3>
+      <p>Prices are subject to change at any time without prior notice, depending on demand and operational costs. Please do not contact us regarding price changes.</p>
+
+      <h3>MMG Terms</h3>
+      <p>By completing payment, you also agree to comply with all applicable <strong>MMG (Guyana Mobile Money) Terms of Service</strong>.</p>
+
+      <h3>Changes to These Terms</h3>
+      <p>We may revise these Terms of Service at any time without notice. By using this website, you agree to be bound by the current version of these terms at the time of your visit and use.</p>
+
+    </div>
+    <div class="modal-footer">
+      <button class="modal-accept-btn" onclick="acceptTos()">I Understand &amp; Accept ✓</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // ── CONFIG ──────────────────────────────────────────────────
+  const WORKER_URL = "https://turnitingy.gt-triculture.workers.dev";
+  // ────────────────────────────────────────────────────────────
+
+  let appliedPromo = null; // { code, discountPct, label }
+
+  // ── ROUNDING: always round UP to nearest 20 ──────────────────
+  function roundUpTo20(amount) {
+    const remainder = amount % 20;
+    if (remainder === 0) return amount;
+    return amount + (20 - remainder);
+  }
+
+  // File handling + email build — attach once DOM is ready
+  window.addEventListener('load', function() {
+    const fileDrop  = document.getElementById('fileDrop');
+    const fileInput = document.getElementById('fileInput');
+
+    fileDrop.addEventListener('dragover', e => { e.preventDefault(); fileDrop.classList.add('dragover'); });
+    fileDrop.addEventListener('dragleave', () => fileDrop.classList.remove('dragover'));
+    fileDrop.addEventListener('drop', e => {
+      e.preventDefault();
+      fileDrop.classList.remove('dragover');
+      if (e.dataTransfer.files.length) setFile(e.dataTransfer.files[0]);
+    });
+    fileInput.addEventListener('change', function() {
+      if (this.files && this.files.length > 0) setFile(this.files[0]);
+    });
+
+    // Build contact email at runtime to bypass Cloudflare obfuscation
+    const el = document.getElementById('contactEmail');
+    if (el) { const u = 'gt.triculture'; const d = 'gmail.com'; el.href = 'mailto:' + u + '@' + d; el.textContent = u + '@' + d; }
+  });
+
+  function setFile(f) {
+    if (f.size > 10 * 1024 * 1024) { showToast('File too large — max 10 MB.', 'error'); return; }
+    const el = document.getElementById('fileChosen');
+    el.textContent = '✓ ' + f.name;
+    el.classList.add('visible');
+    document.getElementById('fileDrop').classList.remove('invalid');
+    document.getElementById('fileErr').classList.remove('visible');
+  }
+
+  async function applyPromo() {
+    const raw = document.getElementById('promoInput').value.trim().toUpperCase();
+    const msg = document.getElementById('promoMsg');
+    if (!raw) { msg.textContent = 'Enter a promo code first.'; msg.className = 'promo-msg bad'; return; }
+
+    msg.textContent = 'Checking…';
+    msg.className = 'promo-msg ok';
+
+    try {
+      const res  = await fetch(WORKER_URL + '/validate-promo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: raw })
+      });
+      const data = await res.json();
+      if (data.valid) {
+        appliedPromo = { code: raw, discountPct: data.discountPct, label: data.label };
+        msg.textContent = '✓ Code applied: ' + appliedPromo.label + ' — ' + appliedPromo.code;
+        msg.className = 'promo-msg ok';
+      } else {
+        appliedPromo = null;
+        msg.textContent = '✕ Invalid promo code.';
+        msg.className = 'promo-msg bad';
+      }
+    } catch {
+      msg.textContent = '✕ Could not verify code. Try again.';
+      msg.className = 'promo-msg bad';
+    }
+  }
+
+  function getService() {
+    const sel = document.querySelector('input[name="service"]:checked');
+    if (!sel) return null;
+    return { value: sel.value, price: parseInt(sel.dataset.price), label: sel.dataset.label };
+  }
+
+  function calcTotal(base) {
+    const priorityAddon = document.getElementById('priorityCheck') && document.getElementById('priorityCheck').checked ? 1000 : 0;
+    const subtotalBeforeRound = base + priorityAddon;
+
+    let afterDiscount = subtotalBeforeRound;
+    let discount = 0;
+    if (appliedPromo) {
+      discount = Math.round(subtotalBeforeRound * appliedPromo.discountPct / 100);
+      afterDiscount = subtotalBeforeRound - discount;
+    }
+
+    const finalRounded = roundUpTo20(afterDiscount);
+    const roundingAdj = finalRounded - afterDiscount;
+
+    return { final: finalRounded, discount, priorityAddon, roundingAdj };
+  }
+
+  function updatePriorityAddon() {
+    if (document.getElementById('paySection').style.display !== 'none') {
+      const svc = getService();
+      if (!svc) return;
+      const { final, discount, priorityAddon, roundingAdj } = calcTotal(svc.price);
+
+      document.getElementById('priorityRow').style.display = priorityAddon > 0 ? 'flex' : 'none';
+
+      const discRow = document.getElementById('discountRow');
+      if (discount > 0) {
+        document.getElementById('discountAmt').textContent = '-$' + discount + ' GYD';
+        discRow.style.display = 'flex';
+      } else {
+        discRow.style.display = 'none';
+      }
+
+      const roundRow = document.getElementById('roundingRow');
+      if (roundingAdj > 0) {
+        document.getElementById('roundingAmt').textContent = '+$' + roundingAdj + ' GYD';
+        roundRow.style.display = 'flex';
+      } else {
+        roundRow.style.display = 'none';
+      }
+
+      document.getElementById('sumTotal').textContent = final;
+      document.getElementById('payExact').textContent = final;
+    }
+  }
+
+  function validate() {
+    let ok = true;
+    const name  = document.getElementById('name').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const svc   = getService();
+    const file  = document.getElementById('fileInput').files[0];
+
+    const err = (id, inputId, show) => {
+      document.getElementById(id).classList.toggle('visible', show);
+      if (inputId) document.getElementById(inputId)?.classList.toggle('invalid', show);
+    };
+
+    if (!name)  { err('nameErr', 'name', true);  ok = false; } else err('nameErr', 'name', false);
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { err('emailErr', 'email', true); ok = false; } else err('emailErr', 'email', false);
+    if (!svc) { document.getElementById('serviceErr').classList.add('visible'); ok = false; } else document.getElementById('serviceErr').classList.remove('visible');
+    if (!file) { document.getElementById('fileErr').classList.add('visible'); fileDrop.classList.add('invalid'); ok = false; } else { document.getElementById('fileErr').classList.remove('visible'); fileDrop.classList.remove('invalid'); }
+    return ok;
+  }
+
+  function proceedToPayment() {
+    if (!validate()) { showToast('Please complete all required fields.', 'error'); return; }
+
+    const name  = document.getElementById('name').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const file  = document.getElementById('fileInput').files[0];
+    const svc   = getService();
+    const { final, discount, priorityAddon, roundingAdj } = calcTotal(svc.price);
+
+    document.getElementById('sumName').textContent         = name;
+    document.getElementById('sumEmail').textContent        = email;
+    document.getElementById('sumFile').textContent         = file.name;
+    document.getElementById('sumServiceLabel').textContent = svc.label;
+    document.getElementById('sumBasePrice').textContent    = '$' + svc.price + ' GYD';
+
+    const discRow = document.getElementById('discountRow');
+    if (discount > 0) {
+      document.getElementById('discountAmt').textContent   = '-$' + discount + ' GYD';
+      document.getElementById('discountLabel').textContent = 'Promo (' + appliedPromo.code + ')';
+      discRow.style.display = 'flex';
+    } else {
+      discRow.style.display = 'none';
+    }
+
+    const roundRow = document.getElementById('roundingRow');
+    if (roundingAdj > 0) {
+      document.getElementById('roundingAmt').textContent = '+$' + roundingAdj + ' GYD';
+      roundRow.style.display = 'flex';
+    } else {
+      roundRow.style.display = 'none';
+    }
+
+    document.getElementById('priorityRow').style.display = priorityAddon > 0 ? 'flex' : 'none';
+
+    document.getElementById('sumTotal').textContent = final;
+    document.getElementById('payExact').textContent = final;
+
+    document.getElementById('formSection').style.display = 'none';
+    document.getElementById('paySection').style.display  = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function backToForm() {
+    document.getElementById('paySection').style.display  = 'none';
+    document.getElementById('formSection').style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  async function handleSubmit() {
+    const mmg = document.getElementById('mmg').value.trim();
+    let valid = true;
+
+    if (!mmg) {
+      document.getElementById('mmgErr').classList.add('visible');
+      document.getElementById('mmg').classList.add('invalid');
+      valid = false;
+    } else {
+      document.getElementById('mmgErr').classList.remove('visible');
+      document.getElementById('mmg').classList.remove('invalid');
+    }
+
+    if (!document.getElementById('tosCheck').checked) {
+      document.getElementById('tosErr').classList.add('visible');
+      valid = false;
+    } else {
+      document.getElementById('tosErr').classList.remove('visible');
+    }
+
+    if (!valid) {
+      showToast('Please complete all required fields.', 'error');
+      return;
+    }
+
+    const btn = document.getElementById('submitBtn');
+    btn.classList.add('loading');
+    btn.disabled = true;
+
+    const name     = document.getElementById('name').value.trim();
+    const email    = document.getElementById('email').value.trim();
+    const file     = document.getElementById('fileInput').files[0];
+    const svc      = getService();
+    const priority = document.getElementById('priorityCheck').checked;
+
+    try {
+      const fd = new FormData();
+      fd.append('name',         name);
+      fd.append('email',        email);
+      fd.append('serviceLabel', svc.label);
+      fd.append('servicePrice', svc.price);
+      fd.append('promoCode',    appliedPromo ? appliedPromo.code : '');
+      fd.append('priority',     priority ? 'true' : 'false');
+      fd.append('mmg',          mmg);
+      fd.append('file',         file, file.name);
+
+      const res  = await fetch(WORKER_URL + '/submit', { method: 'POST', body: fd });
+      const data = await res.json();
+
+      if (!data.ok) throw new Error(data.error || 'Unknown error');
+
+      document.querySelector('header').style.display      = 'none';
+      document.getElementById('paySection').style.display = 'none';
+      document.getElementById('confirmEmail').textContent  = email;
+      document.getElementById('successScreen').classList.add('visible');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    } catch (err) {
+      console.error(err);
+      showToast('Submission failed — please try again.', 'error');
+      btn.classList.remove('loading');
+      btn.disabled = false;
+    }
+  }
+
+  // ── ToS Modal ─────────────────────────────────────────────────
+  function openTosModal(e) {
+    if (e) e.preventDefault();
+    document.getElementById('tosModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeTosModal() {
+    document.getElementById('tosModal').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  function closeTosModalOnOverlay(e) {
+    if (e.target === document.getElementById('tosModal')) closeTosModal();
+  }
+
+  function acceptTos() {
+    document.getElementById('tosCheck').checked = true;
+    document.getElementById('tosErr').classList.remove('visible');
+    closeTosModal();
+  }
+
+  function showToast(msg, type) {
+    const t = document.getElementById('toast');
+    t.textContent = (type === 'success' ? '✓ ' : '✕ ') + msg;
+    t.className = 'toast ' + type + ' show';
+    setTimeout(() => t.classList.remove('show'), 4000);
+  }
+</script>
+</body>
+</html>
