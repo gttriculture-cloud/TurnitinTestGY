@@ -787,6 +787,7 @@
 
       <h3>Pricing</h3>
       <p>Prices are subject to change at any time without prior notice, depending on demand and operational costs. Please do not contact us regarding price changes.</p>
+      <p>Any irregular amount after applying a promo code will automatically be rounded to the nearest $20 GYD for easier transactions.</p>
 
       <h3>MMG Terms</h3>
       <p>By completing payment, you also agree to comply with all applicable <strong>MMG (Guyana Mobile Money) Terms of Service</strong>.</p>
@@ -810,7 +811,10 @@
 
   let appliedPromo = null; // { code, discountPct, label }
 
-  // ── ROUNDING: always round UP to nearest 20 ──────────────────
+  // ── ROUNDING: nearest 20, but only when promo is 5%+ (otherwise always round up) ──
+  function roundNearest20(amount) {
+    return Math.round(amount / 20) * 20;
+  }
   function roundUpTo20(amount) {
     const remainder = amount % 20;
     if (remainder === 0) return amount;
@@ -894,7 +898,10 @@
       afterDiscount = subtotalBeforeRound - discount;
     }
 
-    const finalRounded = roundUpTo20(afterDiscount);
+    // Use nearest-20 rounding only when a promo of 5%+ is applied (can round down)
+    // Otherwise always round up so no-promo or tiny-promo prices never go below base
+    const useNearestRounding = appliedPromo && appliedPromo.discountPct >= 5;
+    const finalRounded = useNearestRounding ? roundNearest20(afterDiscount) : roundUpTo20(afterDiscount);
     const roundingAdj = finalRounded - afterDiscount;
 
     return { final: finalRounded, discount, priorityAddon, roundingAdj };
@@ -917,8 +924,8 @@
       }
 
       const roundRow = document.getElementById('roundingRow');
-      if (roundingAdj > 0) {
-        document.getElementById('roundingAmt').textContent = '+$' + roundingAdj + ' GYD';
+      if (roundingAdj !== 0) {
+        document.getElementById('roundingAmt').textContent = (roundingAdj > 0 ? '+' : '') + '$' + roundingAdj + ' GYD';
         roundRow.style.display = 'flex';
       } else {
         roundRow.style.display = 'none';
@@ -973,8 +980,8 @@
     }
 
     const roundRow = document.getElementById('roundingRow');
-    if (roundingAdj > 0) {
-      document.getElementById('roundingAmt').textContent = '+$' + roundingAdj + ' GYD';
+    if (roundingAdj !== 0) {
+      document.getElementById('roundingAmt').textContent = (roundingAdj > 0 ? '+' : '') + '$' + roundingAdj + ' GYD';
       roundRow.style.display = 'flex';
     } else {
       roundRow.style.display = 'none';
