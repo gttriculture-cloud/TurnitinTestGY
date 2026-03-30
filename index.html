@@ -705,12 +705,23 @@
 
     <div class="pay-box">
       <div class="pay-box-title">&#128179; Pay via MMG Mobile Money</div>
-      <div class="pay-number">7351955</div>
+      <div class="pay-number">6483329</div>
       <div class="pay-hint">
         Send exactly <strong id="payExact">—</strong> GYD to the number above via <strong>MMG (Guyana Mobile Money)</strong>.<br/>
         After payment, enter your <strong>MMG Reference Number</strong> below to confirm.
       </div>
     </div>
+
+    <!-- Terms of Service agreement -->
+    <label class="tos-row" onclick="void(0)">
+      <input type="checkbox" id="tosCheck" onclick="event.stopPropagation()"/>
+      <span class="tos-text">
+        I have read and agree to the
+        <button class="tos-link" onclick="openTosModal(event)">Terms of Service</button>.
+        By submitting, I acknowledge the payment, refund, and usage policies.
+      </span>
+    </label>
+    <div class="tos-err" id="tosErr">You must agree to the Terms of Service to proceed.</div>
 
     <div class="card">
       <div class="card-title">&#9316; Enter MMG Reference Number</div>
@@ -725,17 +736,6 @@
         </div>
       </div>
     </div>
-
-    <!-- Terms of Service agreement -->
-    <label class="tos-row" onclick="void(0)">
-      <input type="checkbox" id="tosCheck" onclick="event.stopPropagation()"/>
-      <span class="tos-text">
-        I have read and agree to the
-        <button class="tos-link" onclick="openTosModal(event)">Terms of Service</button>.
-        By submitting, I acknowledge the payment, refund, and usage policies.
-      </span>
-    </label>
-    <div class="tos-err" id="tosErr">You must agree to the Terms of Service to proceed.</div>
 
     <div style="display:flex; gap:0.6rem;">
       <button class="btn" onclick="backToForm()" style="background:var(--surface2); color:var(--text); border:1px solid var(--border); flex:0 0 auto; width:auto; padding:0.9rem 1.25rem;">&#8592; Back</button>
