@@ -146,7 +146,7 @@
   input::placeholder { color: var(--muted); opacity: 0.5; }
   .service-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr;
     gap: 0.6rem;
   }
   .service-option { position: relative; cursor: pointer; }
@@ -168,7 +168,6 @@
   }
   .service-icon { font-size: 1.4rem; margin-bottom: 0.4rem; }
   .service-name { font-family: 'Syne', sans-serif; font-size: 0.72rem; font-weight: 700; color: var(--text); margin-bottom: 0.25rem; }
-  /* Improved price font on service cards */
   .service-price {
     font-family: 'Space Grotesk', sans-serif;
     font-size: 0.78rem;
@@ -179,13 +178,6 @@
   }
   .service-tag { font-size: 0.58rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); background: rgba(255,255,255,0.05); border-radius: 2px; padding: 0.15rem 0.4rem; display: inline-block; margin-bottom: 0.6rem; }
   .service-tag-featured { color: var(--accent2); background: rgba(255,107,53,0.1); }
-  .service-card-disabled {
-    cursor: not-allowed !important;
-    pointer-events: none;
-    border-color: var(--border) !important;
-    background: rgba(255,255,255,0.02) !important;
-  }
-  .service-option:has(input:disabled) { cursor: not-allowed; pointer-events: none; }
   .service-card-featured { border-color: rgba(245,200,66,0.35) !important; position: relative; }
   .service-badge-top { font-size: 0.55rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.3rem; }
   .service-features { list-style: none; text-align: left; font-size: 0.62rem; color: var(--muted); line-height: 1.7; margin-top: 0.2rem; }
@@ -258,7 +250,6 @@
   .summary-divider { height: 1px; background: rgba(245,200,66,0.15); margin: 0.75rem 0; }
   .summary-total { display: flex; justify-content: space-between; align-items: baseline; }
   .total-label { font-family: 'Syne', sans-serif; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.05em; }
-  /* Improved total amount font */
   .total-amount {
     font-family: 'Space Grotesk', sans-serif;
     font-size: 1.7rem;
@@ -276,7 +267,6 @@
     animation: fadeUp 0.4s ease 0.05s both;
   }
   .pay-box-title { font-size: 0.66rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--info); margin-bottom: 0.75rem; }
-  /* Improved MMG number font — large, clear, spaced */
   .pay-number {
     font-family: 'Space Grotesk', sans-serif;
     font-size: 2.4rem;
@@ -287,7 +277,6 @@
   }
   .pay-hint { font-size: 0.73rem; color: var(--muted); line-height: 1.7; }
   .pay-hint strong { color: var(--accent); font-weight: 500; }
-  /* Improved payExact inline amount */
   #payExact {
     font-family: 'Space Grotesk', sans-serif;
     font-weight: 700;
@@ -568,11 +557,11 @@
       <div class="card-title">&#9313; Select Service</div>
       <div class="service-grid">
         <label class="service-option">
-          <input type="radio" name="service" value="plagiarism" data-price="400" data-label="Plagiarism Report"/>
+          <input type="radio" name="service" value="plagiarism" data-price="600" data-label="Plagiarism Report"/>
           <div class="service-card">
             <div class="service-icon">&#128269;</div>
             <div class="service-name">Plagiarism</div>
-            <div class="service-price">$400 GYD</div>
+            <div class="service-price">$600 GYD</div>
             <div class="service-tag">One-time</div>
             <ul class="service-features">
               <li class="feat-yes">Plagiarism Report</li>
@@ -583,30 +572,15 @@
           </div>
         </label>
         <label class="service-option">
-          <input type="radio" name="service" value="ai" data-price="500" data-label="AI Report" disabled/>
-          <div class="service-card service-card-disabled">
-            <div class="service-icon" style="opacity:0.4;">&#129302;</div>
-            <div class="service-name" style="opacity:0.4;">AI Score</div>
-            <div class="service-price" style="color:var(--accent2); font-size:0.7rem; letter-spacing:0.08em;">COMING SOON</div>
-            <div class="service-tag" style="opacity:0.4;">One-time</div>
-            <ul class="service-features" style="opacity:0.4;">
-              <li class="feat-yes">AI Report</li>
-              <li class="feat-no">No Plagiarism Report</li>
-              <li class="feat-no">Limited Support</li>
-              <li class="feat-no">Low Priority</li>
-            </ul>
-          </div>
-        </label>
-        <label class="service-option">
-          <input type="radio" name="service" value="both" data-price="700" data-label="AI + Plagiarism Bundle (Priority)" disabled/>
-          <div class="service-card service-card-featured service-card-disabled">
-            <div class="service-badge-top" style="opacity:0.4;">⭐ Best Value</div>
-            <div class="service-icon" style="opacity:0.4;">&#9889;</div>
-            <div class="service-name" style="opacity:0.4;">Both Scores</div>
-            <div class="service-price" style="color:var(--accent2); font-size:0.7rem; letter-spacing:0.08em;">COMING SOON</div>
-            <div class="service-tag service-tag-featured" style="opacity:0.4;">Includes Priority</div>
-            <div class="service-tag" style="margin-left:0.2rem; opacity:0.4;">One-time</div>
-            <ul class="service-features" style="opacity:0.4;">
+          <input type="radio" name="service" value="both" data-price="1800" data-label="AI + Plagiarism Bundle (Priority)"/>
+          <div class="service-card service-card-featured">
+            <div class="service-badge-top">⭐ Best Value</div>
+            <div class="service-icon">&#9889;</div>
+            <div class="service-name">Both Scores</div>
+            <div class="service-price">$1,800 GYD</div>
+            <div class="service-tag service-tag-featured">Includes Priority</div>
+            <div class="service-tag" style="margin-left:0.2rem;">One-time</div>
+            <ul class="service-features">
               <li class="feat-yes">Plagiarism Report</li>
               <li class="feat-yes">AI Report</li>
               <li class="feat-yes">Priority Support</li>
@@ -703,16 +677,7 @@
       </div>
     </div>
 
-    <div class="pay-box">
-      <div class="pay-box-title">&#128179; Pay via MMG Mobile Money</div>
-      <div class="pay-number">6483329</div>
-      <div class="pay-hint">
-        Send exactly <strong id="payExact">—</strong> GYD to the number above via <strong>MMG (Guyana Mobile Money)</strong>.<br/>
-        After payment, enter your <strong>MMG Reference Number</strong> below to confirm.
-      </div>
-    </div>
-
-    <!-- Terms of Service agreement -->
+    <!-- Terms of Service agreement — BEFORE MMG payment box -->
     <label class="tos-row" onclick="void(0)">
       <input type="checkbox" id="tosCheck" onclick="event.stopPropagation()"/>
       <span class="tos-text">
@@ -722,6 +687,15 @@
       </span>
     </label>
     <div class="tos-err" id="tosErr">You must agree to the Terms of Service to proceed.</div>
+
+    <div class="pay-box">
+      <div class="pay-box-title">&#128179; Pay via MMG Mobile Money</div>
+      <div class="pay-number">6483329</div>
+      <div class="pay-hint">
+        Send exactly <strong id="payExact">—</strong> GYD to the number above via <strong>MMG (Guyana Mobile Money)</strong>.<br/>
+        After payment, enter your <strong>MMG Reference Number</strong> below to confirm.
+      </div>
+    </div>
 
     <div class="card">
       <div class="card-title">&#9316; Enter MMG Reference Number</div>
@@ -811,7 +785,6 @@
 
   let appliedPromo = null; // { code, discountPct, label }
 
-  // ── ROUNDING: nearest 20, but only when promo is 5%+ (otherwise always round up) ──
   function roundNearest20(amount) {
     return Math.round(amount / 20) * 20;
   }
@@ -821,7 +794,6 @@
     return amount + (20 - remainder);
   }
 
-  // File handling + email build — attach once DOM is ready
   window.addEventListener('load', function() {
     const fileDrop  = document.getElementById('fileDrop');
     const fileInput = document.getElementById('fileInput');
@@ -837,7 +809,6 @@
       if (this.files && this.files.length > 0) setFile(this.files[0]);
     });
 
-    // Build contact email at runtime to bypass Cloudflare obfuscation
     const el = document.getElementById('contactEmail');
     if (el) { const u = 'gt.triculture'; const d = 'gmail.com'; el.href = 'mailto:' + u + '@' + d; el.textContent = u + '@' + d; }
   });
@@ -898,8 +869,6 @@
       afterDiscount = subtotalBeforeRound - discount;
     }
 
-    // Use nearest-20 rounding only when a promo of 5%+ is applied (can round down)
-    // Otherwise always round up so no-promo or tiny-promo prices never go below base
     const useNearestRounding = appliedPromo && appliedPromo.discountPct >= 5;
     const finalRounded = useNearestRounding ? roundNearest20(afterDiscount) : roundUpTo20(afterDiscount);
     const roundingAdj = finalRounded - afterDiscount;
