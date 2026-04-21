@@ -146,9 +146,32 @@
   input::placeholder { color: var(--muted); opacity: 0.5; }
   .service-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
     gap: 0.6rem;
   }
+  .service-card-disabled {
+    cursor: not-allowed !important;
+    pointer-events: none;
+    opacity: 0.42;
+    border-color: var(--border) !important;
+    background: rgba(255,255,255,0.02) !important;
+    position: relative;
+    overflow: hidden;
+  }
+  .service-card-disabled::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 6px,
+      rgba(255,255,255,0.025) 6px,
+      rgba(255,255,255,0.025) 12px
+    );
+    pointer-events: none;
+  }
+  .service-option:has(input:disabled) { cursor: not-allowed; pointer-events: none; }
   .service-option { position: relative; cursor: pointer; }
   .service-option input[type="radio"] { position: absolute; opacity: 0; pointer-events: none; }
   .service-card {
@@ -520,6 +543,92 @@
   @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes spin { to { transform: rotate(360deg); } }
   @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+
+  /* ── Sidebar Ads ── */
+  .ad-sidebar {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 140px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    z-index: 50;
+  }
+  .ad-sidebar.left  { left: calc(50% - 380px); }
+  .ad-sidebar.right { right: calc(50% - 380px); }
+  .ad-unit {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    text-decoration: none;
+    display: block;
+  }
+  .ad-unit:hover { border-color: rgba(245,200,66,0.35); box-shadow: 0 0 18px rgba(245,200,66,0.1); }
+  .ad-unit::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+  }
+  .ad-label {
+    font-size: 0.5rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 0.35rem 0.6rem 0;
+    opacity: 0.7;
+  }
+  .ad-img {
+    width: 100%;
+    aspect-ratio: 1 / 1.3;
+    background: var(--surface2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 0.75rem 0.5rem;
+    text-align: center;
+  }
+  .ad-img-icon { font-size: 1.8rem; }
+  .ad-img-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.3;
+  }
+  .ad-img-desc {
+    font-size: 0.58rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .ad-cta {
+    background: rgba(245,200,66,0.1);
+    color: var(--accent);
+    font-family: 'Syne', sans-serif;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-align: center;
+    padding: 0.5rem;
+    border-top: 1px solid rgba(245,200,66,0.15);
+    transition: background 0.2s;
+  }
+  .ad-unit:hover .ad-cta { background: rgba(245,200,66,0.18); }
+
+  /* hide ads on narrow viewports where they'd overlap */
+  @media (max-width: 1080px) {
+    .ad-sidebar { display: none; }
+  }
+
   @media (max-width: 420px) {
     .service-grid { grid-template-columns: 1fr; }
     .pay-number { font-size: 1.8rem; }
@@ -528,6 +637,49 @@
 </style>
 </head>
 <body>
+
+<!-- Sidebar Ads — visible only on Step 1 (form section) -->
+<div class="ad-sidebar left" id="adLeft">
+  <a class="ad-unit" href="https://www.grammarly.com" target="_blank" rel="noopener sponsored" onclick="trackAd('left-1')">
+    <div class="ad-label">Sponsored</div>
+    <div class="ad-img">
+      <div class="ad-img-icon">✍️</div>
+      <div class="ad-img-title">Write Better. Instantly.</div>
+      <div class="ad-img-desc">AI-powered grammar &amp; style checks for all your writing.</div>
+    </div>
+    <div class="ad-cta">Try Free →</div>
+  </a>
+  <a class="ad-unit" href="https://docs.google.com" target="_blank" rel="noopener sponsored" onclick="trackAd('left-2')">
+    <div class="ad-label">Sponsored</div>
+    <div class="ad-img">
+      <div class="ad-img-icon">📄</div>
+      <div class="ad-img-title">Google Docs</div>
+      <div class="ad-img-desc">Create, edit &amp; share documents for free from anywhere.</div>
+    </div>
+    <div class="ad-cta">Open Docs →</div>
+  </a>
+</div>
+
+<div class="ad-sidebar right" id="adRight">
+  <a class="ad-unit" href="https://www.scribbr.com" target="_blank" rel="noopener sponsored" onclick="trackAd('right-1')">
+    <div class="ad-label">Sponsored</div>
+    <div class="ad-img">
+      <div class="ad-img-icon">🎓</div>
+      <div class="ad-img-title">Scribbr Citation Tool</div>
+      <div class="ad-img-desc">Generate citations &amp; bibliographies in any style instantly.</div>
+    </div>
+    <div class="ad-cta">Cite Now →</div>
+  </a>
+  <a class="ad-unit" href="https://www.canva.com" target="_blank" rel="noopener sponsored" onclick="trackAd('right-2')">
+    <div class="ad-label">Sponsored</div>
+    <div class="ad-img">
+      <div class="ad-img-icon">🎨</div>
+      <div class="ad-img-title">Design with Canva</div>
+      <div class="ad-img-desc">Create beautiful presentations, posters &amp; more — free.</div>
+    </div>
+    <div class="ad-cta">Design Free →</div>
+  </a>
+</div>
 
 <div class="container">
   <header>
@@ -566,6 +718,21 @@
             <ul class="service-features">
               <li class="feat-yes">Plagiarism Report</li>
               <li class="feat-no">No AI Report</li>
+              <li class="feat-no">Limited Support</li>
+              <li class="feat-no">Low Priority</li>
+            </ul>
+          </div>
+        </label>
+        <label class="service-option">
+          <input type="radio" name="service" value="ai" data-price="500" data-label="AI Report" disabled/>
+          <div class="service-card service-card-disabled">
+            <div class="service-icon">&#129302;</div>
+            <div class="service-name">AI Score</div>
+            <div class="service-price" style="color:var(--error); font-size:0.68rem; letter-spacing:0.06em; font-family:'Syne',sans-serif; font-weight:800;">DISCONTINUED</div>
+            <div class="service-tag">One-time</div>
+            <ul class="service-features">
+              <li class="feat-yes">AI Report</li>
+              <li class="feat-no">No Plagiarism</li>
               <li class="feat-no">Limited Support</li>
               <li class="feat-no">Low Priority</li>
             </ul>
@@ -744,7 +911,7 @@
       <p><strong>All sales are final.</strong> Once payment is made and your document is submitted, it will be sent through our processing pipeline and no refunds will be issued.</p>
       <p>If you paid too little, your order will not be processed unless you pay the remaining balance in a separate transaction. <strong>You must include both transaction reference numbers</strong> in the reference field for your payment to be accepted. If you paid a short balance and did not pay the remainder, you will <strong>not</strong> receive a refund. If you paid too much, your order will still be processed but the excess amount will <strong>not</strong> be refunded.</p>
       <p>If you applied a promo code but had already paid the original (non-discounted) price, <strong>no refund will be issued</strong> — you must pay the full listed price.</p>
-      <p>Refunds are only considered in cases of a technical error or a mistake made on our end. All approved refunds are processed through MMG.</p>
+      <p>Refunds are only considered in cases of a technical error or a mistake made on our end. All approved refunds are processed through MMG. <strong>You must have made at least three (3) purchases with us before you are eligible for any refunds entirely.</strong></p>
 
       <h3>Transaction ID Validity</h3>
       <p>Once you have paid through MMG, your transaction ID is valid on our end for <strong>2 weeks (14 days)</strong> from the date of payment. After that period, the transaction ID expires and cannot be recovered. If your ID expires before you submit your order, you will need to pay again. Please submit your order promptly after completing payment.</p>
@@ -754,10 +921,28 @@
       <p>Submitting excessive drafts or spamming our system creates backlogs for all users, including yourself. Repeated abuse will result in your submissions being ignored entirely.</p>
 
       <h3>Disclaimer of Affiliation &amp; Intent</h3>
-      <p>We are not affiliated with any other Guyanese company nor any international company. We do not seek to bypass any system or platform for any purpose. We are simply offering a service that any person can rightfully pay for. Every person with a valid MMG account in Guyana has access to our services once payment has been made and the order submitted. Our intent is solely to provide access to certain reports for the public and not to harm any organization in any way. Any person who uses information obtained through our service for harmful or dishonest activities does so outside of our control, and should be addressed by their respective organization or through legal means if necessary.</p>
+      <p>We are not affiliated with any other Guyanese company nor any international company. <strong>We are not affiliated with Turnitin.com in any way, and any reference to Turnitin is for informational purposes only.</strong> We do not seek to bypass any system or platform for any purpose. We are simply offering a service that any person can rightfully pay for. Every person with a valid MMG account in Guyana has access to our services once payment has been made and the order submitted. Our intent is solely to provide access to certain reports for the public and not to harm any organization in any way. Any person who uses information obtained through our service for harmful or dishonest activities does so outside of our control, and should be addressed by their respective organization or through legal means if necessary.</p>
 
       <h3>Disclaimer of Accuracy &amp; Liability</h3>
       <p>We do not guarantee the accuracy, reliability, or results from the use of our services, including any reports generated. Our service is not responsible for any repercussions arising from the use of our product, including but not limited to academic dishonesty claims or institutional disciplinary actions. Use of our services is entirely at your own risk.</p>
+      <p>The materials on this website are provided <strong>"as is"</strong>. We make no warranties, expressed or implied, and hereby disclaim all other warranties including implied warranties of merchantability, fitness for a particular purpose, or non-infringement of intellectual property rights.</p>
+
+      <h3>Prohibited Uses &amp; Intellectual Property</h3>
+      <p>By accessing this website and its materials, you agree that you will not:</p>
+      <p>
+        • Modify or copy the materials.<br/>
+        • Use the materials for any commercial purpose or public display.<br/>
+        • Attempt to decompile or reverse engineer any software on our website.<br/>
+        • Remove any copyright or other proprietary notations.<br/>
+        • Transfer the materials to another person or "mirror" the materials on any other server.<br/>
+        • Give access to the materials to another person, or access the materials on behalf of another person.
+      </p>
+
+      <h3>Transaction Integrity &amp; Bypass Policy</h3>
+      <p>Any attempt to bypass any paywall or re-use old or previously used transaction IDs will make your submission void. For whatever reason, <strong>no refunds will be given</strong> in these cases.</p>
+
+      <h3>Report Privacy &amp; Submission IDs</h3>
+      <p>Submission IDs and logos are removed from our final reports for data privacy, and protection against your document and our services.</p>
 
       <h3>Pricing</h3>
       <p>Prices are subject to change at any time without prior notice, depending on demand and operational costs. Please do not contact us regarding price changes.</p>
@@ -782,6 +967,18 @@
   // ── CONFIG ──────────────────────────────────────────────────
   const WORKER_URL = "https://turnitingy.gt-triculture.workers.dev";
   // ────────────────────────────────────────────────────────────
+
+  function trackAd(id) {
+    // Placeholder for future ad click tracking / analytics
+    console.log('Ad clicked:', id);
+  }
+
+  function setAdsVisible(visible) {
+    const l = document.getElementById('adLeft');
+    const r = document.getElementById('adRight');
+    if (l) l.style.display = visible ? '' : 'none';
+    if (r) r.style.display = visible ? '' : 'none';
+  }
 
   let appliedPromo = null; // { code, discountPct, label }
 
@@ -963,12 +1160,14 @@
 
     document.getElementById('formSection').style.display = 'none';
     document.getElementById('paySection').style.display  = 'block';
+    setAdsVisible(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   function backToForm() {
     document.getElementById('paySection').style.display  = 'none';
     document.getElementById('formSection').style.display = 'block';
+    setAdsVisible(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
