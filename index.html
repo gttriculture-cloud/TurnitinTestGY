@@ -580,12 +580,13 @@
     <div class="card">
       <div class="card-title">&#9313; Select Service</div>
       <div class="service-grid">
+        <!-- Plagiarism: updated to $1,200 GYD -->
         <label class="service-option">
-          <input type="radio" name="service" value="plagiarism" data-price="600" data-label="Plagiarism Report"/>
+          <input type="radio" name="service" value="plagiarism" data-price="1200" data-label="Plagiarism Report"/>
           <div class="service-card">
             <div class="service-icon">&#128269;</div>
             <div class="service-name">Plagiarism</div>
-            <div class="service-price">$600 GYD</div>
+            <div class="service-price">$1,200 GYD</div>
             <div class="service-tag">One-time</div>
             <ul class="service-features">
               <li class="feat-yes">Plagiarism Report</li>
@@ -595,8 +596,9 @@
             </ul>
           </div>
         </label>
+        <!-- AI Only: discontinued, data-price set to 10000 to deter manipulation -->
         <label class="service-option">
-          <input type="radio" name="service" value="ai" data-price="500" data-label="AI Report" disabled/>
+          <input type="radio" name="service" value="ai" data-price="10000" data-label="AI Report" disabled/>
           <div class="service-card service-card-disabled">
             <div class="service-icon">&#129302;</div>
             <div class="service-name">AI Score</div>
@@ -610,13 +612,14 @@
             </ul>
           </div>
         </label>
+        <!-- Both: updated to $3,200 GYD -->
         <label class="service-option">
-          <input type="radio" name="service" value="both" data-price="1800" data-label="AI + Plagiarism Bundle (Priority)"/>
+          <input type="radio" name="service" value="both" data-price="3200" data-label="AI + Plagiarism Bundle (Priority)"/>
           <div class="service-card service-card-featured">
             <div class="service-badge-top">⭐ Best Value</div>
             <div class="service-icon">&#9889;</div>
             <div class="service-name">Both Scores</div>
-            <div class="service-price">$1,800 GYD</div>
+            <div class="service-price">$3,200 GYD</div>
             <div class="service-tag service-tag-featured">Includes Priority</div>
             <div class="service-tag" style="margin-left:0.2rem;">One-time</div>
             <ul class="service-features">
@@ -687,6 +690,11 @@
       <div class="summary-row muted"><span>Document</span><span id="sumFile" style="max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">—</span></div>
       <div class="summary-divider"></div>
       <div class="summary-row"><span id="sumServiceLabel">Service</span><span id="sumBasePrice">—</span></div>
+      <!-- Mandatory processing fee — always shown, non-waivable -->
+      <div class="summary-row" id="processingFeeRow" style="color: var(--muted); font-size: 0.75rem;">
+        <span>🔧 Processing Fee</span>
+        <span>+$160 GYD</span>
+      </div>
       <div class="summary-row discount" id="discountRow" style="display:none;">
         <span id="discountLabel">Promo discount</span>
         <span id="discountAmt">—</span>
@@ -696,8 +704,8 @@
         <span id="roundingAmt">—</span>
       </div>
       <div class="summary-row" id="priorityRow" style="display:none; color: var(--accent);">
-        <span>⚡ Max Priority Add-on</span>
-        <span>+$1,000 GYD</span>
+        <span>⚡ Accelerated Results Add-on</span>
+        <span>+$500 GYD</span>
       </div>
       <div class="summary-divider"></div>
       <div class="summary-total">
@@ -706,11 +714,12 @@
       </div>
     </div>
 
+    <!-- Accelerated Results add-on (renamed from Maximum Priority) -->
     <div class="priority-addon" onclick="document.getElementById('priorityCheck').click(); event.stopPropagation();">
       <div class="priority-addon-inner">
         <input type="checkbox" id="priorityCheck" onchange="updatePriorityAddon()" onclick="event.stopPropagation()"/>
         <div class="priority-addon-text">
-          <div class="priority-addon-title">⚡ Add Maximum Priority — +$1,000 GYD</div>
+          <div class="priority-addon-title">⚡ Add Accelerated Results — +$500 GYD</div>
           <div class="priority-addon-desc">Skip the queue and get your report processed first. Your submission will be treated as top priority, reducing wait time significantly. Please note wait times can still take up to 48 hours if volume is high.</div>
         </div>
       </div>
@@ -840,6 +849,7 @@
 <script>
   // ── CONFIG ──────────────────────────────────────────────────
   const WORKER_URL = "https://turnitingy.gt-triculture.workers.dev";
+  const PROCESSING_FEE = 160; // Mandatory, non-waivable
   // ────────────────────────────────────────────────────────────
 
   let appliedPromo = null; // { code, discountPct, label }
@@ -918,30 +928,35 @@
   }
 
   function calcTotal(base) {
-    const priorityAddon = document.getElementById('priorityCheck') && document.getElementById('priorityCheck').checked ? 1000 : 0;
-    const subtotalBeforeRound = base + priorityAddon;
+    // Accelerated Results add-on: $500 GYD
+    const accelAddon = document.getElementById('priorityCheck') && document.getElementById('priorityCheck').checked ? 500 : 0;
+    // Processing fee is always added AFTER discount, so it is never discounted
+    const subtotalBeforeDiscount = base + accelAddon;
 
-    let afterDiscount = subtotalBeforeRound;
+    let afterDiscount = subtotalBeforeDiscount;
     let discount = 0;
     if (appliedPromo) {
-      discount = Math.round(subtotalBeforeRound * appliedPromo.discountPct / 100);
-      afterDiscount = subtotalBeforeRound - discount;
+      discount = Math.round(subtotalBeforeDiscount * appliedPromo.discountPct / 100);
+      afterDiscount = subtotalBeforeDiscount - discount;
     }
 
-    const useNearestRounding = appliedPromo && appliedPromo.discountPct >= 5;
-    const finalRounded = useNearestRounding ? roundNearest20(afterDiscount) : roundUpTo20(afterDiscount);
-    const roundingAdj = finalRounded - afterDiscount;
+    // Add mandatory processing fee AFTER discount (never discounted)
+    const afterFee = afterDiscount + PROCESSING_FEE;
 
-    return { final: finalRounded, discount, priorityAddon, roundingAdj };
+    const useNearestRounding = appliedPromo && appliedPromo.discountPct >= 5;
+    const finalRounded = useNearestRounding ? roundNearest20(afterFee) : roundUpTo20(afterFee);
+    const roundingAdj = finalRounded - afterFee;
+
+    return { final: finalRounded, discount, accelAddon, roundingAdj };
   }
 
   function updatePriorityAddon() {
     if (document.getElementById('paySection').style.display !== 'none') {
       const svc = getService();
       if (!svc) return;
-      const { final, discount, priorityAddon, roundingAdj } = calcTotal(svc.price);
+      const { final, discount, accelAddon, roundingAdj } = calcTotal(svc.price);
 
-      document.getElementById('priorityRow').style.display = priorityAddon > 0 ? 'flex' : 'none';
+      document.getElementById('priorityRow').style.display = accelAddon > 0 ? 'flex' : 'none';
 
       const discRow = document.getElementById('discountRow');
       if (discount > 0) {
@@ -990,7 +1005,7 @@
     const email = document.getElementById('email').value.trim();
     const file  = document.getElementById('fileInput').files[0];
     const svc   = getService();
-    const { final, discount, priorityAddon, roundingAdj } = calcTotal(svc.price);
+    const { final, discount, accelAddon, roundingAdj } = calcTotal(svc.price);
 
     document.getElementById('sumName').textContent         = name;
     document.getElementById('sumEmail').textContent        = email;
@@ -1015,7 +1030,7 @@
       roundRow.style.display = 'none';
     }
 
-    document.getElementById('priorityRow').style.display = priorityAddon > 0 ? 'flex' : 'none';
+    document.getElementById('priorityRow').style.display = accelAddon > 0 ? 'flex' : 'none';
 
     document.getElementById('sumTotal').textContent = final;
     document.getElementById('payExact').textContent = final;
@@ -1064,7 +1079,7 @@
     const email    = document.getElementById('email').value.trim();
     const file     = document.getElementById('fileInput').files[0];
     const svc      = getService();
-    const priority = document.getElementById('priorityCheck').checked;
+    const accel    = document.getElementById('priorityCheck').checked;
 
     try {
       const fd = new FormData();
@@ -1073,7 +1088,7 @@
       fd.append('serviceLabel', svc.label);
       fd.append('servicePrice', svc.price);
       fd.append('promoCode',    appliedPromo ? appliedPromo.code : '');
-      fd.append('priority',     priority ? 'true' : 'false');
+      fd.append('priority',     accel ? 'true' : 'false');
       fd.append('mmg',          mmg);
       fd.append('file',         file, file.name);
 
