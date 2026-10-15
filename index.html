@@ -3,1142 +3,603 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Score Check Portal</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<title>ScoreCheck Guyana | AI &amp; Plagiarism Score Reports</title>
+<meta name="description" content="Get a combined AI-writing and plagiarism score report for your document, delivered to your email. Pay with MMG."/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <style>
-  :root {
-    --bg: #0a0a0f;
-    --surface: #111118;
-    --surface2: #16161f;
-    --border: #1e1e2e;
-    --accent: #f5c842;
-    --accent2: #ff6b35;
-    --text: #e8e8f0;
-    --muted: #6b6b80;
-    --success: #4ade80;
-    --error: #f87171;
-    --info: #60a5fa;
-  }
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'DM Mono', monospace;
-    min-height: 100vh;
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    padding: 2.5rem 1rem 4rem;
-    overflow-x: hidden;
-    position: relative;
-  }
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background:
-      radial-gradient(ellipse 60% 40% at 80% 5%, rgba(245,200,66,0.07) 0%, transparent 60%),
-      radial-gradient(ellipse 40% 50% at 10% 80%, rgba(255,107,53,0.05) 0%, transparent 60%);
-    pointer-events: none;
-    z-index: 0;
-  }
-  body::after {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(255,255,255,0.012) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,0.012) 1px, transparent 1px);
-    background-size: 48px 48px;
-    pointer-events: none;
-    z-index: 0;
-  }
-  .container {
-    position: relative;
-    z-index: 1;
-    width: 100%;
-    max-width: 580px;
-  }
-  header { margin-bottom: 2rem; animation: fadeDown 0.5s ease both; }
-  .badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    background: rgba(245,200,66,0.1);
-    border: 1px solid rgba(245,200,66,0.25);
-    color: var(--accent);
-    font-size: 0.63rem;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    padding: 0.3rem 0.75rem;
-    border-radius: 2px;
-    margin-bottom: 1rem;
-  }
-  .badge::before {
-    content: '';
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: var(--accent);
-    animation: blink 2s infinite;
-  }
-  h1 {
-    font-family: 'Syne', sans-serif;
-    font-size: clamp(1.9rem, 6vw, 2.8rem);
-    font-weight: 800;
-    line-height: 1.05;
-    letter-spacing: -0.02em;
-  }
-  h1 span { color: var(--accent); }
-  .subtitle { margin-top: 0.5rem; color: var(--muted); font-size: 0.78rem; }
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 1.75rem;
-    margin-bottom: 1rem;
-    position: relative;
-    overflow: hidden;
-    animation: fadeUp 0.5s ease 0.1s both;
-  }
-  .card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, var(--accent), var(--accent2));
-  }
-  .card-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 0.78rem;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 1.25rem;
-  }
-  .field { margin-bottom: 1.25rem; }
-  .field:last-child { margin-bottom: 0; }
-  label {
-    display: block;
-    font-size: 0.66rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 0.45rem;
-  }
-  label span { color: var(--accent2); }
-  input[type="text"], input[type="email"] {
-    width: 100%;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    color: var(--text);
-    font-family: 'DM Mono', monospace;
-    font-size: 0.87rem;
-    padding: 0.68rem 1rem;
-    border-radius: 4px;
-    outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
-  }
-  input[type="text"]:focus, input[type="email"]:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(245,200,66,0.08);
-  }
-  input::placeholder { color: var(--muted); opacity: 0.5; }
-  .service-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 0.6rem;
-  }
-  .service-card-disabled {
-    cursor: not-allowed !important;
-    pointer-events: none;
-    opacity: 0.42;
-    border-color: var(--border) !important;
-    background: rgba(255,255,255,0.02) !important;
-    position: relative;
-    overflow: hidden;
-  }
-  .service-card-disabled::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: repeating-linear-gradient(
-      -45deg,
-      transparent,
-      transparent 6px,
-      rgba(255,255,255,0.025) 6px,
-      rgba(255,255,255,0.025) 12px
-    );
-    pointer-events: none;
-  }
-  .service-option:has(input:disabled) { cursor: not-allowed; pointer-events: none; }
-  .service-option { position: relative; cursor: pointer; }
-  .service-option input[type="radio"] { position: absolute; opacity: 0; pointer-events: none; }
-  .service-card {
-    border: 1.5px solid var(--border);
-    border-radius: 4px;
-    padding: 1rem 0.75rem;
-    text-align: center;
-    background: var(--surface2);
-    transition: border-color 0.2s, background 0.2s;
-    cursor: pointer;
-    user-select: none;
-  }
-  .service-card:hover { border-color: rgba(245,200,66,0.4); }
-  .service-option input:checked + .service-card {
-    border-color: var(--accent);
-    background: rgba(245,200,66,0.07);
-  }
-  .service-icon { font-size: 1.4rem; margin-bottom: 0.4rem; }
-  .service-name { font-family: 'Syne', sans-serif; font-size: 0.72rem; font-weight: 700; color: var(--text); margin-bottom: 0.25rem; }
-  .service-price {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 0.78rem;
-    font-weight: 600;
-    color: var(--accent);
-    margin-bottom: 0.3rem;
-    letter-spacing: 0.02em;
-  }
-  .service-tag { font-size: 0.58rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); background: rgba(255,255,255,0.05); border-radius: 2px; padding: 0.15rem 0.4rem; display: inline-block; margin-bottom: 0.6rem; }
-  .service-tag-featured { color: var(--accent2); background: rgba(255,107,53,0.1); }
-  .service-card-featured { border-color: rgba(245,200,66,0.35) !important; position: relative; }
-  .service-badge-top { font-size: 0.55rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.3rem; }
-  .service-features { list-style: none; text-align: left; font-size: 0.62rem; color: var(--muted); line-height: 1.7; margin-top: 0.2rem; }
-  .service-features li { display: flex; align-items: center; gap: 0.3rem; }
-  .feat-yes { color: var(--success) !important; }
-  .feat-no { color: var(--muted) !important; }
-  .feat-yes::before { content: '✓'; color: var(--success); font-weight: 700; }
-  .feat-no::before { content: '✕'; color: var(--muted); }
-  .priority-addon {
-    background: rgba(245,200,66,0.05);
-    border: 1.5px dashed rgba(245,200,66,0.3);
-    border-radius: 6px;
-    padding: 1rem 1.25rem;
-    margin-bottom: 1rem;
-    cursor: pointer;
-    transition: border-color 0.2s, background 0.2s;
-  }
-  .priority-addon:hover { border-color: rgba(245,200,66,0.55); background: rgba(245,200,66,0.08); }
-  .priority-addon-inner { display: flex; align-items: flex-start; gap: 0.75rem; }
-  .priority-addon input[type="checkbox"] { margin-top: 0.15rem; accent-color: var(--accent); width: 15px; height: 15px; flex-shrink: 0; cursor: pointer; }
-  .priority-addon-text { font-size: 0.77rem; line-height: 1.6; }
-  .priority-addon-title { font-family: 'Syne', sans-serif; font-weight: 700; color: var(--accent); font-size: 0.8rem; }
-  .priority-addon-desc { color: var(--muted); font-size: 0.7rem; margin-top: 0.1rem; }
-  .file-drop {
-    border: 1.5px dashed var(--border);
-    border-radius: 4px;
-    padding: 1.25rem;
-    text-align: center;
-    cursor: pointer;
-    transition: border-color 0.2s, background 0.2s;
-    background: var(--surface2);
-    position: relative;
-  }
-  .file-drop:hover, .file-drop.dragover { border-color: var(--accent); background: rgba(245,200,66,0.04); }
-  .file-drop input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; z-index: 2; }
-  .file-label { font-size: 0.76rem; color: var(--muted); }
-  .file-label strong { color: var(--accent); font-weight: 500; }
-  .file-chosen { display: none; margin-top: 0.6rem; font-size: 0.74rem; color: var(--success); }
-  .file-chosen.visible { display: block; }
-  .promo-row { display: flex; gap: 0.5rem; }
-  .promo-row input { flex: 1; }
-  .promo-btn {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    color: var(--text);
-    font-family: 'DM Mono', monospace;
-    font-size: 0.78rem;
-    padding: 0 1.1rem;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: border-color 0.2s, color 0.2s;
-    white-space: nowrap;
-  }
-  .promo-btn:hover { border-color: var(--accent); color: var(--accent); }
-  .promo-msg { margin-top: 0.4rem; font-size: 0.7rem; display: none; }
-  .promo-msg.ok { color: var(--success); display: block; }
-  .promo-msg.bad { color: var(--error); display: block; }
-  .summary-card {
-    background: rgba(245,200,66,0.04);
-    border: 1px solid rgba(245,200,66,0.18);
-    border-radius: 6px;
-    padding: 1.25rem 1.5rem;
-    margin-bottom: 1rem;
-    animation: fadeUp 0.4s ease both;
-  }
-  .summary-title { font-family: 'Syne', sans-serif; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 1rem; }
-  .summary-row { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text); margin-bottom: 0.5rem; }
-  .summary-row.muted { color: var(--muted); font-size: 0.75rem; }
-  .summary-row.discount { color: var(--success); }
-  .summary-divider { height: 1px; background: rgba(245,200,66,0.15); margin: 0.75rem 0; }
-  .summary-total { display: flex; justify-content: space-between; align-items: baseline; }
-  .total-label { font-family: 'Syne', sans-serif; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.05em; }
-  .total-amount {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 1.7rem;
-    font-weight: 700;
-    color: var(--accent);
-    letter-spacing: 0.01em;
-  }
-  .total-currency { font-size: 0.8rem; color: var(--muted); margin-left: 0.2rem; }
-  .pay-box {
-    background: var(--surface2);
-    border: 1px solid rgba(96,165,250,0.25);
-    border-radius: 6px;
-    padding: 1.4rem 1.5rem;
-    margin-bottom: 1rem;
-    animation: fadeUp 0.4s ease 0.05s both;
-  }
-  .pay-box-title { font-size: 0.66rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--info); margin-bottom: 0.75rem; }
-  .pay-number {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 2.4rem;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    color: var(--text);
-    margin-bottom: 0.4rem;
-  }
-  .pay-hint { font-size: 0.73rem; color: var(--muted); line-height: 1.7; }
-  .pay-hint strong { color: var(--accent); font-weight: 500; }
-  #payExact {
-    font-family: 'Space Grotesk', sans-serif;
-    font-weight: 700;
-    font-size: 1em;
-    color: var(--accent);
-    letter-spacing: 0.03em;
-  }
-  .mmg-wrapper {
-    display: flex;
-    align-items: stretch;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    overflow: hidden;
-    transition: border-color 0.2s, box-shadow 0.2s;
-  }
-  .mmg-wrapper:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(245,200,66,0.08); }
-  .mmg-prefix {
-    background: rgba(245,200,66,0.08);
-    border-right: 1px solid var(--border);
-    padding: 0.68rem 0.85rem;
-    font-size: 0.73rem;
-    color: var(--accent);
-    display: flex;
-    align-items: center;
-    white-space: nowrap;
-  }
-  .mmg-wrapper input { border: none !important; box-shadow: none !important; border-radius: 0; flex: 1; min-width: 0; }
-  .btn {
-    width: 100%;
-    background: var(--accent);
-    color: #0a0a0f;
-    font-family: 'Syne', sans-serif;
-    font-size: 0.88rem;
-    font-weight: 800;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    padding: 0.9rem 1.5rem;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-  }
-  .btn:hover:not(:disabled) { background: #ffd966; box-shadow: 0 0 28px rgba(245,200,66,0.3); transform: translateY(-1px); }
-  .btn:active:not(:disabled) { transform: translateY(0); }
-  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
-  .spinner { width: 15px; height: 15px; border: 2px solid rgba(0,0,0,0.25); border-top-color: #000; border-radius: 50%; animation: spin 0.6s linear infinite; display: none; }
-  .btn.loading .spinner { display: block; }
-  input.invalid { border-color: var(--error) !important; }
-  .file-drop.invalid { border-color: var(--error) !important; }
-  .service-err { color: var(--error); font-size: 0.68rem; margin-top: 0.4rem; display: none; }
-  .service-err.visible { display: block; }
-  .field-error { color: var(--error); font-size: 0.68rem; margin-top: 0.35rem; display: none; }
-  .field-error.visible { display: block; }
+:root{--bg:#0c0c11;--surface:#13131a;--surface2:#191922;--border:#262633;--accent:#f5c842;--accent-ink:#14110a;--text:#ececf2;--muted:#8d8da1;--success:#4ade80;--error:#f87171;--info:#7db3f7}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',system-ui,sans-serif;line-height:1.6;font-size:15px}
+h1,h2,h3,.brand{font-family:'Syne',sans-serif;letter-spacing:-.01em}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1040px;margin:0 auto;padding:0 1.25rem}
 
-  /* Terms of Service checkbox row */
-  .tos-row {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.65rem;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 0.85rem 1rem;
-    margin-bottom: 1rem;
-    cursor: pointer;
-    transition: border-color 0.2s;
-  }
-  .tos-row:hover { border-color: rgba(245,200,66,0.35); }
-  .tos-row input[type="checkbox"] {
-    margin-top: 0.15rem;
-    accent-color: var(--accent);
-    width: 15px;
-    height: 15px;
-    flex-shrink: 0;
-    cursor: pointer;
-  }
-  .tos-text {
-    font-size: 0.75rem;
-    color: var(--muted);
-    line-height: 1.6;
-    user-select: none;
-  }
-  .tos-link {
-    color: var(--info);
-    text-decoration: underline;
-    cursor: pointer;
-    background: none;
-    border: none;
-    font-family: inherit;
-    font-size: inherit;
-    padding: 0;
-    transition: color 0.15s;
-  }
-  .tos-link:hover { color: #93c5fd; }
-  .tos-err { color: var(--error); font-size: 0.68rem; margin-top: 0.35rem; margin-bottom: 0.5rem; display: none; }
-  .tos-err.visible { display: block; }
+/* nav */
+.nav{position:sticky;top:0;z-index:50;background:rgba(12,12,17,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--border)}
+.nav .wrap{display:flex;align-items:center;justify-content:space-between;height:64px}
+.brand{display:flex;align-items:center;gap:.6rem;font-weight:800;font-size:1.1rem;text-decoration:none}
+.logo{width:30px;height:30px;border-radius:7px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-size:.95rem;font-weight:800}
+.nav-links{display:flex;gap:1.6rem;align-items:center;font-size:.9rem;color:var(--muted)}
+.nav-links a{text-decoration:none}.nav-links a:hover{color:var(--text)}
+.nav-cta{background:var(--accent);color:var(--accent-ink)!important;padding:.5rem 1rem;border-radius:6px;font-weight:600}
 
-  /* ToS Modal */
-  .modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.75);
-    backdrop-filter: blur(4px);
-    z-index: 300;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 1.5rem;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.25s;
-  }
-  .modal-overlay.open {
-    opacity: 1;
-    pointer-events: all;
-  }
-  .modal {
-    background: var(--surface);
-    border: 1px solid rgba(245,200,66,0.2);
-    border-radius: 8px;
-    width: 100%;
-    max-width: 540px;
-    max-height: 82vh;
-    display: flex;
-    flex-direction: column;
-    transform: translateY(20px) scale(0.97);
-    transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1);
-    position: relative;
-    overflow: hidden;
-  }
-  .modal-overlay.open .modal {
-    transform: translateY(0) scale(1);
-  }
-  .modal::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, var(--accent), var(--accent2));
-  }
-  .modal-header {
-    padding: 1.4rem 1.5rem 1rem;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-shrink: 0;
-  }
-  .modal-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 0.95rem;
-    font-weight: 800;
-    letter-spacing: 0.04em;
-    color: var(--accent);
-  }
-  .modal-close {
-    background: rgba(255,255,255,0.06);
-    border: 1px solid var(--border);
-    color: var(--muted);
-    width: 28px;
-    height: 28px;
-    border-radius: 4px;
-    font-size: 1rem;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: color 0.15s, border-color 0.15s;
-    flex-shrink: 0;
-  }
-  .modal-close:hover { color: var(--text); border-color: var(--muted); }
-  .modal-body {
-    padding: 1.25rem 1.5rem 1.5rem;
-    overflow-y: auto;
-    font-size: 0.78rem;
-    line-height: 1.85;
-    color: var(--muted);
-    flex: 1;
-  }
-  .modal-body h3 {
-    font-family: 'Syne', sans-serif;
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--text);
-    margin-top: 1.1rem;
-    margin-bottom: 0.45rem;
-  }
-  .modal-body h3:first-child { margin-top: 0; }
-  .modal-body p { margin-bottom: 0.6rem; }
-  .modal-body strong { color: var(--text); font-weight: 500; }
-  .modal-footer {
-    padding: 1rem 1.5rem;
-    border-top: 1px solid var(--border);
-    flex-shrink: 0;
-  }
-  .modal-accept-btn {
-    width: 100%;
-    background: var(--accent);
-    color: #0a0a0f;
-    font-family: 'Syne', sans-serif;
-    font-size: 0.82rem;
-    font-weight: 800;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    padding: 0.75rem 1rem;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background 0.2s;
-  }
-  .modal-accept-btn:hover { background: #ffd966; }
+/* hero */
+.hero{padding:4.5rem 0 3.5rem;border-bottom:1px solid var(--border);background:radial-gradient(ellipse 50% 70% at 85% 0,rgba(245,200,66,.07),transparent 70%)}
+.hero .wrap{display:grid;grid-template-columns:1.2fr .8fr;gap:3rem;align-items:center}
+.hero h1{font-size:clamp(2rem,5vw,3.2rem);line-height:1.08;font-weight:800;max-width:15ch}
+.hero p{color:var(--muted);margin-top:1.1rem;max-width:46ch;font-size:1.02rem}
+.hero-actions{display:flex;gap:.75rem;margin-top:1.75rem;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;background:var(--accent);color:var(--accent-ink);font:600 .95rem 'Space Grotesk',sans-serif;padding:.8rem 1.4rem;border:0;border-radius:6px;cursor:pointer;text-decoration:none;transition:background .2s}
+.btn:hover:not(:disabled){background:#ffd966}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.ghost{background:transparent;color:var(--text);border:1px solid var(--border)}
+.btn.ghost:hover:not(:disabled){background:var(--surface2)}
+.report-preview{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.4rem}
+.rp-head{font-weight:600;font-size:.85rem;color:var(--muted);margin-bottom:1rem}
+.rp-row{display:flex;justify-content:space-between;align-items:center;padding:.8rem 0;border-top:1px solid var(--border)}
+.rp-row strong{font-family:'Syne',sans-serif;font-size:1.5rem}
+.rp-row small{color:var(--muted);display:block;font-size:.78rem}
+.bar{height:6px;border-radius:3px;background:var(--surface2);margin-top:.35rem;width:130px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent)}
+.rp-note{font-size:.72rem;color:var(--muted);margin-top:.8rem}
 
-  .toast {
-    position: fixed;
-    bottom: 2rem;
-    right: 1.5rem;
-    padding: 0.8rem 1.1rem;
-    border-radius: 5px;
-    font-size: 0.78rem;
-    transform: translateY(120%);
-    transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
-    z-index: 200;
-    max-width: 300px;
-    line-height: 1.5;
-  }
-  .toast.show { transform: translateY(0); }
-  .toast.success { background: rgba(74,222,128,0.12); border: 1px solid rgba(74,222,128,0.3); color: var(--success); }
-  .toast.error { background: rgba(248,113,113,0.12); border: 1px solid rgba(248,113,113,0.3); color: var(--error); }
-  .success-screen { display: none; text-align: center; padding: 3.5rem 1rem; animation: fadeUp 0.5s ease both; }
-  .success-screen.visible { display: block; }
-  .checkmark { width: 64px; height: 64px; background: rgba(74,222,128,0.1); border: 2px solid var(--success); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; margin: 0 auto 1.5rem; }
-  .success-screen h2 { font-family: 'Syne', sans-serif; font-size: 1.6rem; font-weight: 800; margin-bottom: 0.6rem; }
-  .success-screen p { color: var(--muted); font-size: 0.8rem; line-height: 1.8; max-width: 340px; margin: 0 auto; }
-  @keyframes fadeDown { from { opacity: 0; transform: translateY(-14px); } to { opacity: 1; transform: translateY(0); } }
-  @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+/* sections */
+section{padding:3.5rem 0}
+.sec-title{font-size:1.6rem;font-weight:700;margin-bottom:.4rem}
+.sec-sub{color:var(--muted);margin-bottom:2rem;max-width:56ch}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+.step{border-left:2px solid var(--accent);padding:.2rem 0 .2rem 1rem}
+.step h3{font-size:1rem;margin-bottom:.3rem}
+.step p{color:var(--muted);font-size:.88rem}
+.trust{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:2.5rem;padding-top:2rem;border-top:1px solid var(--border)}
+.trust div{font-size:.85rem;color:var(--muted)}
+.trust strong{display:block;color:var(--text);font-size:.92rem;margin-bottom:.15rem}
 
-  @media (max-width: 420px) {
-    .service-grid { grid-template-columns: 1fr; }
-    .pay-number { font-size: 1.8rem; }
-    .modal { max-height: 90vh; }
-  }
+/* order */
+#order{background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.order-grid{display:grid;grid-template-columns:1fr 340px;gap:2rem;align-items:start}
+.panel{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:1.5rem;margin-bottom:1rem}
+.panel h3{font-size:1rem;margin-bottom:1.1rem}
+.field{margin-bottom:1.1rem}.field:last-child{margin-bottom:0}
+label.lbl{display:block;font-size:.82rem;color:var(--muted);margin-bottom:.4rem}
+label.lbl em{color:var(--error);font-style:normal}
+input[type=text],input[type=email]{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);font:inherit;padding:.7rem .9rem;border-radius:6px;outline:none;transition:border-color .2s}
+input[type=text]:focus,input[type=email]:focus{border-color:var(--accent)}
+input::placeholder{color:var(--muted);opacity:.6}
+input.invalid{border-color:var(--error)!important}
+.err{color:var(--error);font-size:.78rem;margin-top:.35rem;display:none}.err.on{display:block}
+
+.plan{border:1.5px solid var(--accent);border-radius:8px;padding:1.1rem 1.2rem;background:rgba(245,200,66,.05);display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.plan h4{font-family:'Syne',sans-serif;font-size:1rem}
+.plan ul{list-style:none;margin-top:.6rem;font-size:.85rem;color:var(--muted)}
+.plan li::before{content:'✓ ';color:var(--success);font-weight:700}
+.plan .price{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:700;color:var(--accent);text-align:right}
+.plan .price small{display:block;font-family:'Space Grotesk',sans-serif;font-size:.75rem;color:var(--muted);font-weight:400}
+
+.drop{border:1.5px dashed var(--border);border-radius:8px;padding:1.4rem;text-align:center;position:relative;background:var(--surface2);transition:border-color .2s}
+.drop:hover,.drop.dragover{border-color:var(--accent)}
+.drop.invalid{border-color:var(--error)}
+.drop input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.drop b{color:var(--accent);font-weight:500}
+.drop small{display:block;color:var(--muted);font-size:.78rem;margin-top:.2rem}
+.chosen{display:none;margin-top:.5rem;color:var(--success);font-size:.85rem}.chosen.on{display:block}
+.reqs{margin-top:1rem;font-size:.82rem;color:var(--muted);padding-left:1.1rem}
+.reqs strong{color:var(--text);font-weight:500}
+
+.promo-row{display:flex;gap:.5rem}.promo-row input{flex:1}
+.promo-msg{font-size:.8rem;margin-top:.4rem;display:none}.promo-msg.ok{color:var(--success);display:block}.promo-msg.bad{color:var(--error);display:block}
+
+.notice{border:1px solid var(--border);border-radius:8px;padding:.9rem 1.1rem;font-size:.85rem;color:var(--muted);margin-bottom:1rem}
+.notice strong{color:var(--text)}
+
+/* sidebar */
+.aside{position:sticky;top:84px}
+.aside .panel{background:var(--bg)}
+.aside h3{margin-bottom:.8rem}
+.aside p,.aside li{font-size:.85rem;color:var(--muted)}
+.aside ul{list-style:none}.aside li{padding:.35rem 0;border-top:1px solid var(--border)}
+.aside a{color:var(--info);text-decoration:none}
+
+/* payment step */
+.summary-row{display:flex;justify-content:space-between;gap:1rem;font-size:.88rem;margin-bottom:.5rem}
+.summary-row.m{color:var(--muted);font-size:.82rem}.summary-row.disc{color:var(--success)}
+.summary-row span:last-child{text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:220px}
+.divider{height:1px;background:var(--border);margin:.8rem 0}
+.total{display:flex;justify-content:space-between;align-items:baseline}
+.total b{font-family:'Syne',sans-serif;font-size:1.7rem;color:var(--accent)}
+.total small{color:var(--muted);margin-left:.25rem}
+
+.methods{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}
+.method{border:1.5px solid var(--border);border-radius:8px;padding:.9rem 1rem;background:var(--surface2);cursor:pointer;text-align:left;font:inherit;color:var(--text);display:flex;flex-direction:column;gap:.2rem;transition:border-color .2s}
+.method:hover{border-color:rgba(245,200,66,.5)}
+.method.sel{border-color:var(--accent);background:rgba(245,200,66,.06)}
+.method b{font-weight:600;font-size:.92rem}
+.method span{font-size:.78rem;color:var(--muted)}
+.soon{display:inline-block;font-size:.7rem;background:rgba(125,179,247,.12);color:var(--info);border-radius:4px;padding:.1rem .45rem;margin-left:.4rem;font-weight:500}
+.pay-number{font-family:'Syne',sans-serif;font-size:2.2rem;font-weight:700;letter-spacing:.1em;margin:.3rem 0}
+.pay-hint{font-size:.85rem;color:var(--muted)}.pay-hint strong{color:var(--accent);font-weight:600}
+.warn{margin-top:.7rem;background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.25);border-radius:6px;padding:.65rem .85rem;font-size:.8rem;color:var(--error)}
+.mmg-wrap{display:flex;border:1px solid var(--border);border-radius:6px;overflow:hidden}
+.mmg-wrap:focus-within{border-color:var(--accent)}
+.mmg-wrap span{background:var(--surface2);padding:.7rem .85rem;font-size:.82rem;color:var(--accent);border-right:1px solid var(--border);white-space:nowrap}
+.mmg-wrap input{border:0!important;border-radius:0;flex:1;min-width:0}
+.check{display:flex;gap:.65rem;align-items:flex-start;border:1px solid var(--border);border-radius:8px;padding:.85rem 1rem;margin-bottom:1rem;cursor:pointer;font-size:.85rem;color:var(--muted)}
+.check input{margin-top:.2rem;accent-color:var(--accent);width:15px;height:15px;flex-shrink:0}
+.check.accent{border-style:dashed;border-color:rgba(245,200,66,.35);background:rgba(245,200,66,.04)}
+.check.accent b{color:var(--accent);display:block;font-weight:600}
+.linkbtn{background:none;border:0;color:var(--info);text-decoration:underline;font:inherit;cursor:pointer;padding:0}
+.row{display:flex;gap:.6rem}.row .btn{flex:1}.row .back{flex:0 0 auto}
+.spinner{width:15px;height:15px;border:2px solid rgba(0,0,0,.25);border-top-color:#000;border-radius:50%;animation:spin .6s linear infinite;display:none}
+.loading .spinner{display:block}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* success */
+.success{display:none;text-align:center;padding:3rem 1rem;max-width:460px;margin:0 auto}.success.on{display:block}
+.tick{width:60px;height:60px;border:2px solid var(--success);color:var(--success);border-radius:50%;display:grid;place-items:center;font-size:1.5rem;margin:0 auto 1.2rem}
+.success h3{font-size:1.5rem;margin-bottom:.6rem}.success p{color:var(--muted);font-size:.9rem}
+
+/* footer */
+footer{padding:2.5rem 0;color:var(--muted);font-size:.82rem}
+footer .wrap{display:flex;justify-content:space-between;gap:1.5rem;flex-wrap:wrap}
+footer a{color:var(--muted);text-decoration:none}footer a:hover{color:var(--text)}
+.foot-links{display:flex;gap:1.4rem}
+
+/* modals */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);z-index:300;display:flex;align-items:center;justify-content:center;padding:1.2rem;opacity:0;pointer-events:none;transition:opacity .2s}
+.overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:10px;width:100%;max-width:540px;max-height:86vh;display:flex;flex-direction:column;transform:translateY(12px);transition:transform .2s}
+.overlay.open .modal{transform:none}
+.m-head{padding:1.1rem 1.4rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.m-head h3{font-size:1rem}
+.x{background:var(--surface2);border:1px solid var(--border);color:var(--muted);width:30px;height:30px;border-radius:6px;cursor:pointer;font-size:1rem}
+.x:hover{color:var(--text)}
+.m-body{padding:1.2rem 1.4rem;overflow-y:auto;font-size:.85rem;color:var(--muted);flex:1}
+.m-body h4{font-family:'Syne',sans-serif;color:var(--text);font-size:.9rem;margin:1.1rem 0 .35rem}.m-body h4:first-child{margin-top:0}
+.m-body p{margin-bottom:.55rem}.m-body strong{color:var(--text);font-weight:500}
+.m-foot{padding:1rem 1.4rem;border-top:1px solid var(--border)}
+.tabs{display:flex;gap:.3rem;padding:.7rem 1.4rem 0;border-bottom:1px solid var(--border)}
+.tab{background:none;border:0;border-bottom:2px solid transparent;color:var(--muted);font:500 .85rem 'Space Grotesk',sans-serif;padding:.5rem .8rem;cursor:pointer}
+.tab.on{color:var(--accent);border-color:var(--accent)}
+.tabpane{display:none}.tabpane.on{display:block}
+.card-box{padding:1.4rem}
+.card-banner{background:rgba(125,179,247,.1);border:1px solid rgba(125,179,247,.3);color:var(--info);border-radius:8px;padding:.8rem 1rem;font-size:.85rem;margin-bottom:1.1rem}
+.card-box input:disabled{cursor:not-allowed;opacity:.55}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}
+.secure{font-size:.75rem;color:var(--muted);text-align:center;margin-top:.8rem}
+
+.toast{position:fixed;bottom:1.5rem;right:1.2rem;padding:.8rem 1.1rem;border-radius:6px;font-size:.85rem;transform:translateY(150%);transition:transform .3s;z-index:400;max-width:300px;background:var(--surface);border:1px solid var(--error);color:var(--error)}
+.toast.show{transform:none}
+
+@media (max-width:820px){
+ .hero .wrap,.order-grid{grid-template-columns:1fr}.aside{position:static}
+ .steps,.trust{grid-template-columns:1fr 1fr}.nav-links a:not(.nav-cta){display:none}
+}
+@media (max-width:520px){.steps,.trust,.methods,.two{grid-template-columns:1fr}.pay-number{font-size:1.8rem}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
 <body>
 
-<div class="container">
-  <header>
-    <div class="badge">Document Scoring Portal</div>
-    <h1>Get Your <span>Score Report</span></h1>
-    <p class="subtitle">AI detection &amp; plagiarism checks · Secure payment via MMG</p>
-  </header>
+<nav class="nav"><div class="wrap">
+  <a class="brand" href="#top"><span class="logo">S</span>ScoreCheck</a>
+  <div class="nav-links"><a href="#how">How it works</a><a href="#contact">Support</a><a href="#order" class="nav-cta">Get your report</a></div>
+</div></nav>
 
-  <!-- STEP 1: FORM -->
-  <div id="formSection">
+<header class="hero" id="top"><div class="wrap">
+  <div>
+    <h1>Know your AI and plagiarism scores before you submit</h1>
+    <p>Upload your document, pay with MMG, and receive a combined AI-writing and similarity report in your inbox. Documents are never stored or added to any repository.</p>
+    <div class="hero-actions"><a class="btn" href="#order">Start an order</a><a class="btn ghost" href="#how">See how it works</a></div>
+  </div>
+  <div class="report-preview" aria-hidden="true">
+    <div class="rp-head">Sample report summary</div>
+    <div class="rp-row"><div>Similarity<small>Matched against sources</small></div><div style="text-align:right"><strong>12%</strong><div class="bar"><i style="width:12%"></i></div></div></div>
+    <div class="rp-row"><div>AI writing<small>Likelihood of AI text</small></div><div style="text-align:right"><strong>4%</strong><div class="bar"><i style="width:4%"></i></div></div></div>
+    <div class="rp-note">Illustration only. Your report reflects your own document.</div>
+  </div>
+</div></header>
 
-    <div class="card">
-      <div class="card-title">&#9312; Personal Information</div>
-      <div class="field">
-        <label>Full Name <span>*</span></label>
-        <input type="text" id="name" placeholder="Your full name" autocomplete="name"/>
-        <div class="field-error" id="nameErr">Please enter your full name.</div>
-      </div>
-      <div class="field">
-        <label>Email Address <span>*</span></label>
-        <input type="email" id="email" placeholder="you@example.com" autocomplete="email"/>
-        <div class="field-error" id="emailErr">Please enter a valid email address.</div>
-      </div>
-    </div>
+<section id="how"><div class="wrap">
+  <h2 class="sec-title">How it works</h2>
+  <p class="sec-sub">Three steps, no account needed.</p>
+  <div class="steps">
+    <div class="step"><h3>Submit your document</h3><p>Enter your details and upload a PDF, DOC, DOCX or TXT file.</p></div>
+    <div class="step"><h3>Pay securely</h3><p>Pay the exact total with MMG mobile money and enter your reference number.</p></div>
+    <div class="step"><h3>Get your report</h3><p>Your combined report arrives by email, usually within 24 to 72 hours.</p></div>
+  </div>
+  <div class="trust">
+    <div><strong>Non-repository</strong>Your file is not saved to any database.</div>
+    <div><strong>Two reports, one price</strong>AI and plagiarism scores together.</div>
+    <div><strong>Local payments</strong>Pay with MMG from anywhere in Guyana.</div>
+    <div><strong>Email support</strong>Help is one message away.</div>
+  </div>
+</div></section>
 
-    <div class="card">
-      <div class="card-title">&#9313; Select Service</div>
-      <div class="service-grid">
-        <!-- Plagiarism: updated to $1,200 GYD -->
-        <label class="service-option">
-          <input type="radio" name="service" value="plagiarism" data-price="1200" data-label="Plagiarism Report"/>
-          <div class="service-card">
-            <div class="service-icon">&#128269;</div>
-            <div class="service-name">Plagiarism</div>
-            <div class="service-price">$1,200 GYD</div>
-            <div class="service-tag">One-time</div>
-            <ul class="service-features">
-              <li class="feat-yes">Plagiarism Report</li>
-              <li class="feat-no">No AI Report</li>
-              <li class="feat-no">Limited Support</li>
-              <li class="feat-no">Low Priority</li>
-            </ul>
+<section id="order"><div class="wrap">
+  <div id="formArea">
+  <h2 class="sec-title">Place your order</h2>
+  <p class="sec-sub">Complete the details below, then review your total and pay.</p>
+  <div class="order-grid">
+    <div>
+      <!-- STEP 1 -->
+      <div id="formSection">
+        <div class="panel">
+          <h3>Your details</h3>
+          <div class="field"><label class="lbl" for="name">Full name <em>*</em></label><input type="text" id="name" placeholder="Your full name" autocomplete="name"/><div class="err" id="nameErr">Enter your full name.</div></div>
+          <div class="field"><label class="lbl" for="email">Email address <em>*</em></label><input type="email" id="email" placeholder="you@example.com" autocomplete="email"/><div class="err" id="emailErr">Enter a valid email address.</div></div>
+        </div>
+
+        <div class="panel">
+          <h3>Your service</h3>
+          <input type="radio" name="service" value="both" data-price="3200" data-label="AI + Plagiarism Bundle (Priority)" checked hidden/>
+          <div class="plan">
+            <div>
+              <h4>AI + plagiarism report</h4>
+              <ul><li>Plagiarism report</li><li>AI writing report</li><li>Priority support</li><li>Higher queue priority</li></ul>
+            </div>
+            <div class="price">$3,200 GYD<small>One-time, per document</small></div>
           </div>
-        </label>
-        <!-- AI Only: discontinued, data-price set to 10000 to deter manipulation -->
-        <label class="service-option">
-          <input type="radio" name="service" value="ai" data-price="10000" data-label="AI Report" disabled/>
-          <div class="service-card service-card-disabled">
-            <div class="service-icon">&#129302;</div>
-            <div class="service-name">AI Score</div>
-            <div class="service-price" style="color:var(--error); font-size:0.68rem; letter-spacing:0.06em; font-family:'Syne',sans-serif; font-weight:800;">DISCONTINUED</div>
-            <div class="service-tag">One-time</div>
-            <ul class="service-features">
-              <li class="feat-yes">AI Report</li>
-              <li class="feat-no">No Plagiarism</li>
-              <li class="feat-no">Limited Support</li>
-              <li class="feat-no">Low Priority</li>
-            </ul>
+        </div>
+
+        <div class="panel">
+          <h3>Upload your document</h3>
+          <div class="drop" id="fileDrop">
+            <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.txt" aria-label="Upload document"/>
+            <div style="font-size:1.4rem">&#128196;</div>
+            <div><b>Click to upload</b> or drag and drop</div>
+            <small>PDF, DOC, DOCX, TXT. Max 10 MB.</small>
+            <div class="chosen" id="fileChosen"></div>
           </div>
+          <div class="err" id="fileErr">Upload your document.</div>
+          <ul class="reqs">
+            <li><strong>Size:</strong> up to 10 MB</li>
+            <li><strong>Length:</strong> up to 800 pages, at least 20 words</li>
+            <li><strong>Content:</strong> selectable text only. Scanned, image-only or password-protected files are not accepted.</li>
+          </ul>
+        </div>
+
+        <div class="panel">
+          <h3>Promo code <span style="color:var(--muted);font-weight:400;font-size:.8rem">(optional)</span></h3>
+          <div class="promo-row"><input type="text" id="promoInput" placeholder="Enter code" aria-label="Promo code"/><button class="btn ghost" type="button" onclick="applyPromo()">Apply</button></div>
+          <div class="promo-msg" id="promoMsg"></div>
+        </div>
+
+        <div class="notice"><strong>Processing time:</strong> reports are emailed within 24 to 72 hours, and may take longer when volume is high.</div>
+        <button class="btn" style="width:100%" type="button" onclick="proceedToPayment()">Review order and pay</button>
+      </div>
+
+      <!-- STEP 2 -->
+      <div id="paySection" style="display:none">
+        <div class="panel">
+          <h3>Order summary</h3>
+          <div class="summary-row m"><span>Customer</span><span id="sumName">-</span></div>
+          <div class="summary-row m"><span>Email</span><span id="sumEmail">-</span></div>
+          <div class="summary-row m"><span>Document</span><span id="sumFile">-</span></div>
+          <div class="divider"></div>
+          <div class="summary-row"><span id="sumServiceLabel">Service</span><span id="sumBasePrice">-</span></div>
+          <div class="summary-row m"><span>Processing fee</span><span>+$160 GYD</span></div>
+          <div class="summary-row disc" id="discountRow" style="display:none"><span id="discountLabel">Promo</span><span id="discountAmt">-</span></div>
+          <div class="summary-row m" id="roundingRow" style="display:none"><span>Rounding adjustment</span><span id="roundingAmt">-</span></div>
+          <div class="summary-row" id="priorityRow" style="display:none;color:var(--accent)"><span>Accelerated results</span><span>+$500 GYD</span></div>
+          <div class="divider"></div>
+          <div class="total"><span style="font-weight:600">Total due</span><span><b id="sumTotal">-</b><small>GYD</small></span></div>
+        </div>
+
+        <label class="check accent">
+          <input type="checkbox" id="priorityCheck" onchange="updateTotals()"/>
+          <span><b>Add accelerated results (+$500 GYD)</b>Your report is processed first. Wait times can still reach 48 hours when volume is high.</span>
         </label>
-        <!-- Both: updated to $3,200 GYD -->
-        <label class="service-option">
-          <input type="radio" name="service" value="both" data-price="3200" data-label="AI + Plagiarism Bundle (Priority)"/>
-          <div class="service-card service-card-featured">
-            <div class="service-badge-top">⭐ Best Value</div>
-            <div class="service-icon">&#9889;</div>
-            <div class="service-name">Both Scores</div>
-            <div class="service-price">$3,200 GYD</div>
-            <div class="service-tag service-tag-featured">Includes Priority</div>
-            <div class="service-tag" style="margin-left:0.2rem;">One-time</div>
-            <ul class="service-features">
-              <li class="feat-yes">Plagiarism Report</li>
-              <li class="feat-yes">AI Report</li>
-              <li class="feat-yes">Priority Support</li>
-              <li class="feat-yes">Higher Priority</li>
-            </ul>
+
+        <div class="panel">
+          <h3>Payment method</h3>
+          <div class="methods">
+            <button type="button" class="method sel" id="mMmg"><b>MMG mobile money</b><span>Available now</span></button>
+            <button type="button" class="method" id="mStripe" onclick="openStripe()"><b>Card <span class="soon">Coming soon</span></b><span>Processed through Stripe</span></button>
           </div>
+        </div>
+
+        <div class="panel" id="mmgPanel">
+          <h3>Pay with MMG</h3>
+          <div class="pay-hint">Send exactly <strong id="payExact">-</strong> GYD to this MMG number:</div>
+          <div class="pay-number">6483329</div>
+          <div class="pay-hint">Then enter your <strong>MMG reference number</strong> below.</div>
+          <div class="field" style="margin-top:1rem">
+            <div class="mmg-wrap"><span>MMG ref</span><input type="text" id="mmg" placeholder="Your transaction reference number" aria-label="MMG reference number"/></div>
+            <div class="err" id="mmgErr">Enter your MMG reference number.</div>
+            <div class="warn">Check this carefully. Your payment will be accepted but <strong>not processed</strong> if the reference number is wrong.</div>
+          </div>
+        </div>
+
+        <label class="check">
+          <input type="checkbox" id="tosCheck"/>
+          <span>I have read and agree to the <button type="button" class="linkbtn" onclick="openTos(event,'mmg')">Terms of Service</button>, including the payment, refund and usage policies.</span>
         </label>
-      </div>
-      <div class="service-err" id="serviceErr">Please select a service.</div>
-    </div>
+        <div class="err" id="tosErr" style="margin:-.5rem 0 1rem">You must agree to the Terms of Service to continue.</div>
 
-    <div class="card">
-      <div class="card-title">&#9314; Upload Document</div>
-      <div class="file-drop" id="fileDrop">
-        <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.txt"/>
-        <div style="font-size:1.4rem; margin-bottom:0.35rem;">&#128196;</div>
-        <div class="file-label"><strong>Click to upload</strong> or drag &amp; drop</div>
-        <div class="file-label" style="font-size:0.68rem; margin-top:0.2rem;">PDF, DOC, DOCX, TXT &middot; Max 10 MB</div>
-        <div class="file-chosen" id="fileChosen"></div>
-      </div>
-      <div class="field-error" id="fileErr">Please upload your document.</div>
-      <div style="margin-top: 1rem; background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: 0.9rem 1rem; font-size: 0.72rem; color: var(--muted); line-height: 1.9;">
-        <div style="font-family: 'Syne', sans-serif; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text); margin-bottom: 0.5rem;">📋 File Requirements</div>
-        <div>• <strong style="color:var(--text);">Size:</strong> Maximum 10 MB.</div>
-        <div>• <strong style="color:var(--text);">Length:</strong> Maximum 800 pages.</div>
-        <div>• <strong style="color:var(--text);">Minimum Length:</strong> At least 20 words of text.</div>
-        <div>• <strong style="color:var(--text);">Content Type:</strong> Files must contain selectable text. Scanned files, image-only PDFs, or password-protected documents are not accepted.</div>
+        <div class="row">
+          <button class="btn ghost back" type="button" onclick="backToForm()">Back</button>
+          <button class="btn" id="submitBtn" type="button" onclick="handleSubmit()"><div class="spinner"></div><span>Submit order</span></button>
+        </div>
       </div>
     </div>
 
-    <div class="card">
-      <div class="card-title">&#9315; Promo Code <span style="color:var(--muted); font-size:0.65rem; text-transform:none; font-weight:400; letter-spacing:0.02em;">(optional)</span></div>
-      <div class="promo-row">
-        <input type="text" id="promoInput" placeholder="ENTER-CODE"/>
-        <button class="promo-btn" onclick="applyPromo()">Apply</button>
+    <aside class="aside" id="contact">
+      <div class="panel">
+        <h3>Need help?</h3>
+        <p>If something goes wrong or you have a question, email us and we will get back to you.</p>
+        <ul style="margin-top:.8rem"><li><a id="contactEmail" href="#"></a></li><li>Include your name and MMG reference number.</li></ul>
       </div>
-      <div class="promo-msg" id="promoMsg"></div>
-    </div>
-
-    <div style="background: rgba(255,107,53,0.08); border: 1px solid rgba(255,107,53,0.3); border-radius: 6px; padding: 1rem 1.25rem; margin-bottom: 1rem; font-size: 0.78rem; color: var(--text); line-height: 1.8;">
-      <div style="font-family: 'Syne', sans-serif; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent2); margin-bottom: 0.5rem;">⏳ Processing Time Notice</div>
-      After submission, your score report will be delivered to your email. Please allow anywhere from <strong>24 hours to 72 hours</strong> for processing, with longer waiting times if the volume remains high. Thank you for your patience.
-    </div>
-
-    <div style="background: rgba(96,165,250,0.06); border: 1px solid rgba(96,165,250,0.2); border-radius: 6px; padding: 1rem 1.25rem; margin-bottom: 1rem; font-size: 0.78rem; color: var(--text); line-height: 1.9;">
-      <div style="font-family: 'Syne', sans-serif; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--info); margin-bottom: 0.6rem;">📞 Need Help? Contact Us</div>
-      If something goes wrong or you need assistance, feel free to reach out:<br/>
-      <div style="margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.35rem;">
-        <span>✉️ <strong style="color:var(--text);">Email:</strong> <a id="contactEmail" href="#" style="color:var(--info); text-decoration:none;"></a></span>
+      <div class="panel">
+        <h3>Good to know</h3>
+        <ul><li>Reports are for personal use only.</li><li>All sales are final.</li><li>Your MMG reference is valid for 14 days.</li></ul>
       </div>
-    </div>
-
-    <button class="btn" onclick="proceedToPayment()" style="margin-bottom:1rem;">
-      Review Order &amp; Pay &#8594;
-    </button>
+    </aside>
+  </div>
   </div>
 
-  <!-- STEP 2: PAYMENT -->
-  <div id="paySection" style="display:none;">
-
-    <div class="summary-card">
-      <div class="summary-title">&#128203; Order Summary</div>
-      <div class="summary-row muted"><span>Customer</span><span id="sumName">—</span></div>
-      <div class="summary-row muted"><span>Email</span><span id="sumEmail">—</span></div>
-      <div class="summary-row muted"><span>Document</span><span id="sumFile" style="max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">—</span></div>
-      <div class="summary-divider"></div>
-      <div class="summary-row"><span id="sumServiceLabel">Service</span><span id="sumBasePrice">—</span></div>
-      <!-- Mandatory processing fee — always shown, non-waivable -->
-      <div class="summary-row" id="processingFeeRow" style="color: var(--muted); font-size: 0.75rem;">
-        <span>🔧 Processing Fee</span>
-        <span>+$160 GYD</span>
-      </div>
-      <div class="summary-row discount" id="discountRow" style="display:none;">
-        <span id="discountLabel">Promo discount</span>
-        <span id="discountAmt">—</span>
-      </div>
-      <div class="summary-row" id="roundingRow" style="display:none; color: var(--muted); font-size: 0.72rem;">
-        <span>Rounding adjustment</span>
-        <span id="roundingAmt">—</span>
-      </div>
-      <div class="summary-row" id="priorityRow" style="display:none; color: var(--accent);">
-        <span>⚡ Accelerated Results Add-on</span>
-        <span>+$500 GYD</span>
-      </div>
-      <div class="summary-divider"></div>
-      <div class="summary-total">
-        <span class="total-label">TOTAL DUE</span>
-        <span><span class="total-amount" id="sumTotal">—</span><span class="total-currency">GYD</span></span>
-      </div>
-    </div>
-
-    <!-- Accelerated Results add-on (renamed from Maximum Priority) -->
-    <div class="priority-addon" onclick="document.getElementById('priorityCheck').click(); event.stopPropagation();">
-      <div class="priority-addon-inner">
-        <input type="checkbox" id="priorityCheck" onchange="updatePriorityAddon()" onclick="event.stopPropagation()"/>
-        <div class="priority-addon-text">
-          <div class="priority-addon-title">⚡ Add Accelerated Results — +$500 GYD</div>
-          <div class="priority-addon-desc">Skip the queue and get your report processed first. Your submission will be treated as top priority, reducing wait time significantly. Please note wait times can still take up to 48 hours if volume is high.</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Terms of Service agreement — BEFORE MMG payment box -->
-    <label class="tos-row" onclick="void(0)">
-      <input type="checkbox" id="tosCheck" onclick="event.stopPropagation()"/>
-      <span class="tos-text">
-        I have read and agree to the
-        <button class="tos-link" onclick="openTosModal(event)">Terms of Service</button>.
-        By submitting, I acknowledge the payment, refund, and usage policies.
-      </span>
-    </label>
-    <div class="tos-err" id="tosErr">You must agree to the Terms of Service to proceed.</div>
-
-    <div class="pay-box">
-      <div class="pay-box-title">&#128179; Pay via MMG Mobile Money</div>
-      <div class="pay-number">6483329</div>
-      <div class="pay-hint">
-        Send exactly <strong id="payExact">—</strong> GYD to the number above via <strong>MMG (Guyana Mobile Money)</strong>.<br/>
-        After payment, enter your <strong>MMG Reference Number</strong> below to confirm.
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">&#9316; Enter MMG Reference Number</div>
-      <div class="field">
-        <div class="mmg-wrapper">
-          <div class="mmg-prefix">MMG REF</div>
-          <input type="text" id="mmg" placeholder="Your transaction reference number"/>
-        </div>
-        <div class="field-error" id="mmgErr">Please enter your MMG reference number.</div>
-        <div style="margin-top: 0.6rem; background: rgba(248,113,113,0.08); border: 1px solid rgba(248,113,113,0.25); border-radius: 4px; padding: 0.6rem 0.85rem; font-size: 0.71rem; color: var(--error); line-height: 1.6;">
-          ⚠️ <strong>Make sure this is correct</strong>, as your payment will be accepted but <strong>NOT</strong> be processed if the reference number/transaction ID is wrong.
-        </div>
-      </div>
-    </div>
-
-    <div style="display:flex; gap:0.6rem;">
-      <button class="btn" onclick="backToForm()" style="background:var(--surface2); color:var(--text); border:1px solid var(--border); flex:0 0 auto; width:auto; padding:0.9rem 1.25rem;">&#8592; Back</button>
-      <button class="btn" id="submitBtn" onclick="handleSubmit()">
-        <div class="spinner"></div>
-        <span class="btn-text">Confirm &amp; Submit &#8594;</span>
-      </button>
-    </div>
+  <div class="success" id="successScreen">
+    <div class="tick">&#10003;</div>
+    <h3>Order received</h3>
+    <p>Your payment and document were submitted. Your report will be sent to <strong id="confirmEmail" style="color:var(--accent)">your email</strong>.</p>
+    <p style="margin-top:.8rem;color:var(--accent)">Processing takes 24 to 72 hours, and longer when volume is high.</p>
   </div>
+</div></section>
 
-  <!-- SUCCESS -->
-  <div class="card success-screen" id="successScreen">
-    <div class="checkmark">&#10003;</div>
-    <h2>Submission Received!</h2>
-    <p>Your payment and document have been submitted successfully.<br/>Your score report will be sent to <strong id="confirmEmail" style="color:var(--accent);">your email</strong>.<br/><br/><span style="color:var(--accent2);">⏳ Please note: Processing may take anywhere from <strong>24 hours to 72 hours</strong>, with longer waiting times if the volume remains high. Thank you for your patience!</span></p>
+<footer><div class="wrap">
+  <div><div class="brand" style="margin-bottom:.4rem"><span class="logo">S</span>ScoreCheck</div>Independent score reports for the Guyanese public.<br/>Not affiliated with any other company or institution.</div>
+  <div class="foot-links"><a href="#how">How it works</a><a href="#contact">Support</a><a href="#" onclick="openTos(event,'general')">Terms of Service</a></div>
+</div></footer>
+
+<!-- Terms of Service -->
+<div class="overlay" id="tosModal" onclick="if(event.target===this)closeTos()">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="tosTitle">
+    <div class="m-head"><h3 id="tosTitle">Terms of Service</h3><button class="x" onclick="closeTos()" aria-label="Close">&#10005;</button></div>
+    <div class="tabs">
+      <button class="tab on" data-tab="general" onclick="setTab('general')">General</button>
+      <button class="tab" data-tab="mmg" onclick="setTab('mmg')">MMG payments</button>
+      <button class="tab" data-tab="stripe" onclick="setTab('stripe')">Card (Stripe)</button>
+    </div>
+    <div class="m-body">
+      <div class="tabpane on" data-pane="general">
+        <h4>Data collection and privacy</h4>
+        <p>We collect your name, email address and the contents of the document you submit, and use them only to process your order. <strong>We do not sell or share your data with third parties.</strong> All checks are non-repository and are not stored in any database.</p>
+        <h4>Fair use</h4>
+        <p>This service is for personal use only. <strong>You may not resell reports or use them for the benefit of third parties.</strong> Abuse, including resale or providing reports to others for profit, will result in future transactions being ignored without refund. Excessive drafts or spamming create backlogs for everyone and may lead to your submissions being ignored.</p>
+        <h4>Affiliation and intent</h4>
+        <p>We are not affiliated with any other Guyanese or international company. <strong>We are not affiliated with Turnitin.com in any way</strong>, and any reference to it is informational only. We do not seek to bypass any system or platform. Anyone with a valid payment method may use our services once payment is made and the order submitted. Anyone who uses information from our reports for dishonest or harmful purposes does so outside our control.</p>
+        <h4>Accuracy and liability</h4>
+        <p>We do not guarantee the accuracy or reliability of any report. We are not responsible for any consequences of using our product, including academic dishonesty claims or disciplinary action. Use is entirely at your own risk. Materials are provided <strong>"as is"</strong>, without warranties of any kind, including merchantability, fitness for a particular purpose or non-infringement.</p>
+        <h4>Prohibited uses</h4>
+        <p>You agree not to: modify or copy the materials; use them commercially or for public display; decompile or reverse engineer our software; remove copyright or proprietary notices; transfer or mirror the materials; or give access to another person or access them on another person's behalf.</p>
+        <h4>Transaction integrity</h4>
+        <p>Attempting to bypass the paywall, or reusing old or previously used transaction references, voids your submission with <strong>no refund</strong>. Using developer tools or any other method to alter prices or data fields makes your transaction <strong>immediately void</strong>, with no refund if payment was made.</p>
+        <h4>Report privacy</h4>
+        <p>Submission IDs and logos are removed from final reports to protect your document and our services.</p>
+        <h4>Pricing</h4>
+        <p>Prices may change at any time without notice. A mandatory processing fee applies to every order and is never discounted. Amounts after a promo code are rounded to the nearest $20 GYD. Any irregular price found during processing voids the transaction, with no refund if payment was made. Please do not contact us about price changes.</p>
+        <h4>Changes to these terms</h4>
+        <p>We may revise these terms at any time without notice. The version current at the time of your visit applies.</p>
+      </div>
+
+      <div class="tabpane" data-pane="mmg">
+        <h4>Paying with MMG</h4>
+        <p>Send the exact total shown to our MMG number, then enter your <strong>MMG reference number</strong> at checkout. By paying you also agree to the <strong>MMG (Guyana Mobile Money) Terms of Service</strong>.</p>
+        <h4>Reference numbers</h4>
+        <p>Your payment is accepted but <strong>not processed</strong> if the reference number is wrong. Your reference is valid for <strong>14 days</strong> from the payment date. After that it expires and cannot be recovered, and you must pay again. Submit your order promptly after paying.</p>
+        <h4>Short payments and overpayments</h4>
+        <p>If you paid too little, your order is not processed until you pay the balance in a separate transaction. <strong>Enter both reference numbers</strong> in the reference field. If you do not pay the balance, you will not be refunded. If you paid too much, your order is still processed but the excess is <strong>not refunded</strong>.</p>
+        <h4>Promo codes</h4>
+        <p>If you paid the original price before applying a promo code, <strong>no refund is issued</strong>. You must pay the full listed price at checkout.</p>
+        <h4>Refunds</h4>
+        <p><strong>All sales are final.</strong> Once payment is made and your document submitted, it enters our processing pipeline and no refunds are issued. Refunds are considered only for a technical error or a mistake on our end, and you must have made <strong>at least three (3) purchases</strong> with us to be eligible. Approved refunds are paid through MMG.</p>
+      </div>
+
+      <div class="tabpane" data-pane="stripe">
+        <h4>Availability</h4>
+        <p><strong>Card payments are not yet available.</strong> These terms apply once card payments launch. Until then, MMG is the only payment method.</p>
+        <h4>Payment processing</h4>
+        <p>Card payments are processed by <strong>Stripe</strong>. We do not see or store your full card number, expiry date or security code. By paying by card you also agree to Stripe's terms and privacy policy.</p>
+        <h4>Payment confirmation</h4>
+        <p>No reference number is required. Your order is confirmed automatically once Stripe approves the payment. If a payment is declined or fails, no order is created and you are not charged.</p>
+        <h4>Amounts and currency</h4>
+        <p>You are charged the exact total shown at checkout, including the mandatory processing fee. Your bank may apply currency conversion or foreign transaction fees, which we do not control and will not refund.</p>
+        <h4>Refunds and disputes</h4>
+        <p><strong>All sales are final.</strong> Refunds are considered only for a technical error or a mistake on our end, and approved refunds are returned to the original card through Stripe. The three (3) purchase minimum in the MMG terms applies here as well. Please contact us before opening a chargeback. Chargebacks on orders that were delivered may result in your future orders being ignored.</p>
+        <h4>Promo codes and pricing</h4>
+        <p>The general pricing, promo code and rounding terms apply to card payments. Any irregular price found during processing voids the order.</p>
+      </div>
+    </div>
+    <div class="m-foot"><button class="btn" style="width:100%" onclick="acceptTos()">I understand and accept</button></div>
   </div>
 </div>
 
-<!-- Terms of Service Modal -->
-<div class="modal-overlay" id="tosModal" onclick="closeTosModalOnOverlay(event)">
-  <div class="modal">
-    <div class="modal-header">
-      <div class="modal-title">📄 Terms of Service</div>
-      <button class="modal-close" onclick="closeTosModal()">✕</button>
-    </div>
-    <div class="modal-body">
-
-      <h3>Data Collection &amp; Privacy</h3>
-      <p>By using this service, you consent to us collecting your name, email address, and any information contained in the document you submit. This information is used solely for processing your order. <strong>We do not sell or share your data with any third parties.</strong> All information is stored securely on our servers. All checks are non-repository and will not be stored in any database.</p>
-
-      <h3>Refund Policy</h3>
-      <p><strong>All sales are final.</strong> Once payment is made and your document is submitted, it will be sent through our processing pipeline and no refunds will be issued.</p>
-      <p>If you paid too little, your order will not be processed unless you pay the remaining balance in a separate transaction. <strong>You must include both transaction reference numbers</strong> in the reference field for your payment to be accepted. If you paid a short balance and did not pay the remainder, you will <strong>not</strong> receive a refund. If you paid too much, your order will still be processed but the excess amount will <strong>not</strong> be refunded.</p>
-      <p>If you applied a promo code but had already paid the original (non-discounted) price, <strong>no refund will be issued</strong> — you must pay the full listed price.</p>
-      <p>Refunds are only considered in cases of a technical error or a mistake made on our end. All approved refunds are processed through MMG. <strong>You must have made at least three (3) purchases with us before you are eligible for any refunds entirely.</strong></p>
-
-      <h3>Transaction ID Validity</h3>
-      <p>Once you have paid through MMG, your transaction ID is valid on our end for <strong>2 weeks (14 days)</strong> from the date of payment. After that period, the transaction ID expires and cannot be recovered. If your ID expires before you submit your order, you will need to pay again. Please submit your order promptly after completing payment.</p>
-
-      <h3>Fair Use &amp; Abuse</h3>
-      <p>This service is for personal use only. <strong>You may not use our reports for resale or for the benefit of third parties.</strong> Any abuse of this policy — including commercial resale or providing reports to others for profit — will result in your future transactions being ignored without refund.</p>
-      <p>Submitting excessive drafts or spamming our system creates backlogs for all users, including yourself. Repeated abuse will result in your submissions being ignored entirely.</p>
-
-      <h3>Disclaimer of Affiliation &amp; Intent</h3>
-      <p>We are not affiliated with any other Guyanese company nor any international company. <strong>We are not affiliated with Turnitin.com in any way, and any reference to Turnitin is for informational purposes only.</strong> We do not seek to bypass any system or platform for any purpose. We are simply offering a service that any person can rightfully pay for. Every person with a valid MMG account in Guyana has access to our services once payment has been made and the order submitted. Our intent is solely to provide access to certain reports for the public and not to harm any organization in any way. Any person who uses information obtained through our service for harmful or dishonest activities does so outside of our control, and should be addressed by their respective organization or through legal means if necessary.</p>
-
-      <h3>Disclaimer of Accuracy &amp; Liability</h3>
-      <p>We do not guarantee the accuracy, reliability, or results from the use of our services, including any reports generated. Our service is not responsible for any repercussions arising from the use of our product, including but not limited to academic dishonesty claims or institutional disciplinary actions. Use of our services is entirely at your own risk.</p>
-      <p>The materials on this website are provided <strong>"as is"</strong>. We make no warranties, expressed or implied, and hereby disclaim all other warranties including implied warranties of merchantability, fitness for a particular purpose, or non-infringement of intellectual property rights.</p>
-
-      <h3>Prohibited Uses &amp; Intellectual Property</h3>
-      <p>By accessing this website and its materials, you agree that you will not:</p>
-      <p>
-        • Modify or copy the materials.<br/>
-        • Use the materials for any commercial purpose or public display.<br/>
-        • Attempt to decompile or reverse engineer any software on our website.<br/>
-        • Remove any copyright or other proprietary notations.<br/>
-        • Transfer the materials to another person or "mirror" the materials on any other server.<br/>
-        • Give access to the materials to another person, or access the materials on behalf of another person.
-      </p>
-
-      <h3>Transaction Integrity &amp; Bypass Policy</h3>
-      <p>Any attempt to bypass any paywall or re-use old or previously used transaction IDs will make your submission void. For whatever reason, <strong>no refunds will be given</strong> in these cases.</p>
-      <p>Any attempt to use browser developer tools (such as "Inspect Element") or any other method to manipulate, alter, or falsify price values or data fields on this website will make your transaction <strong>immediately void</strong>. No refunds will be provided if payment has already been made.</p>
-
-      <h3>Report Privacy &amp; Submission IDs</h3>
-      <p>Submission IDs and logos are removed from our final reports for data privacy, and protection against your document and our services.</p>
-
-      <h3>Pricing</h3>
-      <p>Prices are subject to change at any time without prior notice, depending on demand and operational costs. Please do not contact us regarding price changes.</p>
-      <p>Any irregular amount after applying a promo code will automatically be rounded to the nearest $20 GYD for easier transactions.</p>
-      <p>Any irregular price noted during processing — including irregular prices arising from promotional codes or regular purchases — will result in your transaction being <strong>immediately voided</strong>. <strong>No refunds will be provided</strong> if payment has already been made.</p>
-
-      <h3>MMG Terms</h3>
-      <p>By completing payment, you also agree to comply with all applicable <strong>MMG (Guyana Mobile Money) Terms of Service</strong>.</p>
-
-      <h3>Changes to These Terms</h3>
-      <p>We may revise these Terms of Service at any time without notice. By using this website, you agree to be bound by the current version of these terms at the time of your visit and use.</p>
-
-    </div>
-    <div class="modal-footer">
-      <button class="modal-accept-btn" onclick="acceptTos()">I Understand &amp; Accept ✓</button>
+<!-- Stripe overlay (display only) -->
+<div class="overlay" id="stripeModal" onclick="if(event.target===this)closeStripe()">
+  <div class="modal" style="max-width:440px" role="dialog" aria-modal="true" aria-labelledby="stripeTitle">
+    <div class="m-head"><h3 id="stripeTitle">Pay by card</h3><button class="x" onclick="closeStripe()" aria-label="Close">&#10005;</button></div>
+    <div class="card-box">
+      <div class="card-banner"><strong>Card payments are coming soon.</strong> Please pay with MMG for now.</div>
+      <div class="field"><label class="lbl">Card number</label><input type="text" placeholder="1234 1234 1234 1234" disabled/></div>
+      <div class="two">
+        <div class="field"><label class="lbl">Expiry</label><input type="text" placeholder="MM / YY" disabled/></div>
+        <div class="field"><label class="lbl">CVC</label><input type="text" placeholder="CVC" disabled/></div>
+      </div>
+      <div class="field"><label class="lbl">Name on card</label><input type="text" placeholder="Full name" disabled/></div>
+      <button class="btn" style="width:100%" type="button" aria-disabled="true" onclick="return false">Pay <span id="stripeAmt"></span> GYD</button>
+      <div class="secure">Card payments will be processed securely through Stripe.</div>
+      <div class="secure" style="margin-top:.4rem"><button type="button" class="linkbtn" onclick="closeStripe();openTos(event,'stripe')">Card payment terms</button> &nbsp;|&nbsp; <button type="button" class="linkbtn" onclick="closeStripe()">Use MMG instead</button></div>
     </div>
   </div>
 </div>
 
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" role="alert"></div>
 
 <script>
-  // ── CONFIG ──────────────────────────────────────────────────
-  const WORKER_URL = "https://turnitingy.gt-triculture.workers.dev";
-  const PROCESSING_FEE = 160; // Mandatory, non-waivable
-  // ────────────────────────────────────────────────────────────
+const WORKER_URL = "https://turnitingy.gt-triculture.workers.dev";
+const PROCESSING_FEE = 160;
+let appliedPromo = null;
+const $ = id => document.getElementById(id);
 
-  let appliedPromo = null; // { code, discountPct, label }
+const roundNearest20 = a => Math.round(a/20)*20;
+const roundUpTo20 = a => a % 20 === 0 ? a : a + (20 - a % 20);
 
-  function roundNearest20(amount) {
-    return Math.round(amount / 20) * 20;
-  }
-  function roundUpTo20(amount) {
-    const remainder = amount % 20;
-    if (remainder === 0) return amount;
-    return amount + (20 - remainder);
-  }
-
-  window.addEventListener('load', function() {
-    const fileDrop  = document.getElementById('fileDrop');
-    const fileInput = document.getElementById('fileInput');
-
-    fileDrop.addEventListener('dragover', e => { e.preventDefault(); fileDrop.classList.add('dragover'); });
-    fileDrop.addEventListener('dragleave', () => fileDrop.classList.remove('dragover'));
-    fileDrop.addEventListener('drop', e => {
-      e.preventDefault();
-      fileDrop.classList.remove('dragover');
-      if (e.dataTransfer.files.length) setFile(e.dataTransfer.files[0]);
-    });
-    fileInput.addEventListener('change', function() {
-      if (this.files && this.files.length > 0) setFile(this.files[0]);
-    });
-
-    const el = document.getElementById('contactEmail');
-    if (el) { const u = 'gt.triculture'; const d = 'gmail.com'; el.href = 'mailto:' + u + '@' + d; el.textContent = u + '@' + d; }
+window.addEventListener('load', () => {
+  const drop = $('fileDrop'), input = $('fileInput');
+  drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('dragover'); });
+  drop.addEventListener('dragleave', () => drop.classList.remove('dragover'));
+  drop.addEventListener('drop', e => {
+    e.preventDefault(); drop.classList.remove('dragover');
+    if (e.dataTransfer.files.length) { input.files = e.dataTransfer.files; setFile(e.dataTransfer.files[0]); }
   });
+  input.addEventListener('change', function(){ if (this.files.length) setFile(this.files[0]); });
+  const el = $('contactEmail'), u = 'gt.triculture', d = 'gmail.com';
+  el.href = 'mailto:' + u + '@' + d; el.textContent = u + '@' + d;
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeTos(); closeStripe(); } });
+});
 
-  function setFile(f) {
-    if (f.size > 10 * 1024 * 1024) { showToast('File too large — max 10 MB.', 'error'); return; }
-    const el = document.getElementById('fileChosen');
-    el.textContent = '✓ ' + f.name;
-    el.classList.add('visible');
-    document.getElementById('fileDrop').classList.remove('invalid');
-    document.getElementById('fileErr').classList.remove('visible');
+function setFile(f) {
+  if (f.size > 10*1024*1024) { showToast('File too large. Max 10 MB.'); $('fileInput').value = ''; return; }
+  $('fileChosen').textContent = '✓ ' + f.name;
+  $('fileChosen').classList.add('on');
+  $('fileDrop').classList.remove('invalid');
+  $('fileErr').classList.remove('on');
+}
+
+async function applyPromo() {
+  const raw = $('promoInput').value.trim().toUpperCase(), msg = $('promoMsg');
+  if (!raw) { msg.textContent = 'Enter a promo code first.'; msg.className = 'promo-msg bad'; return; }
+  msg.textContent = 'Checking...'; msg.className = 'promo-msg ok';
+  try {
+    const res = await fetch(WORKER_URL + '/validate-promo', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({code: raw}) });
+    const data = await res.json();
+    if (data.valid) {
+      appliedPromo = { code: raw, discountPct: data.discountPct, label: data.label };
+      msg.textContent = '✓ Code applied: ' + data.label + ' (' + raw + ')'; msg.className = 'promo-msg ok';
+    } else { appliedPromo = null; msg.textContent = 'Invalid promo code.'; msg.className = 'promo-msg bad'; }
+  } catch { msg.textContent = 'Could not verify the code. Try again.'; msg.className = 'promo-msg bad'; }
+}
+
+function getService() {
+  const s = document.querySelector('input[name="service"]:checked');
+  return s ? { value: s.value, price: parseInt(s.dataset.price), label: s.dataset.label } : null;
+}
+
+function calcTotal(base) {
+  const accel = $('priorityCheck').checked ? 500 : 0;
+  const sub = base + accel;
+  let discount = 0;
+  if (appliedPromo) discount = Math.round(sub * appliedPromo.discountPct / 100);
+  const afterFee = sub - discount + PROCESSING_FEE;
+  const nearest = appliedPromo && appliedPromo.discountPct >= 5;
+  const final = nearest ? roundNearest20(afterFee) : roundUpTo20(afterFee);
+  return { final, discount, accel, roundingAdj: final - afterFee };
+}
+
+function updateTotals() {
+  const svc = getService(); if (!svc) return;
+  const { final, discount, accel, roundingAdj } = calcTotal(svc.price);
+  $('priorityRow').style.display = accel ? 'flex' : 'none';
+  $('discountRow').style.display = discount > 0 ? 'flex' : 'none';
+  if (discount > 0) {
+    $('discountAmt').textContent = '-$' + discount + ' GYD';
+    $('discountLabel').textContent = 'Promo (' + appliedPromo.code + ')';
   }
+  $('roundingRow').style.display = roundingAdj !== 0 ? 'flex' : 'none';
+  if (roundingAdj !== 0) $('roundingAmt').textContent = (roundingAdj > 0 ? '+' : '') + '$' + roundingAdj + ' GYD';
+  $('sumTotal').textContent = final;
+  $('payExact').textContent = final;
+  $('stripeAmt').textContent = '$' + final;
+}
 
-  async function applyPromo() {
-    const raw = document.getElementById('promoInput').value.trim().toUpperCase();
-    const msg = document.getElementById('promoMsg');
-    if (!raw) { msg.textContent = 'Enter a promo code first.'; msg.className = 'promo-msg bad'; return; }
+function validate() {
+  let ok = true;
+  const name = $('name').value.trim(), email = $('email').value.trim(), file = $('fileInput').files[0];
+  const flag = (errId, inId, bad) => { $(errId).classList.toggle('on', bad); if (inId) $(inId).classList.toggle('invalid', bad); if (bad) ok = false; };
+  flag('nameErr', 'name', !name);
+  flag('emailErr', 'email', !email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email));
+  flag('fileErr', 'fileDrop', !file);
+  return ok;
+}
 
-    msg.textContent = 'Checking…';
-    msg.className = 'promo-msg ok';
+function proceedToPayment() {
+  if (!validate()) { showToast('Please complete all required fields.'); return; }
+  const svc = getService(), file = $('fileInput').files[0];
+  $('sumName').textContent = $('name').value.trim();
+  $('sumEmail').textContent = $('email').value.trim();
+  $('sumFile').textContent = file.name;
+  $('sumServiceLabel').textContent = svc.label;
+  $('sumBasePrice').textContent = '$' + svc.price + ' GYD';
+  updateTotals();
+  $('formSection').style.display = 'none';
+  $('paySection').style.display = 'block';
+  $('order').scrollIntoView({ behavior:'smooth' });
+}
 
-    try {
-      const res  = await fetch(WORKER_URL + '/validate-promo', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code: raw })
-      });
-      const data = await res.json();
-      if (data.valid) {
-        appliedPromo = { code: raw, discountPct: data.discountPct, label: data.label };
-        msg.textContent = '✓ Code applied: ' + appliedPromo.label + ' — ' + appliedPromo.code;
-        msg.className = 'promo-msg ok';
-      } else {
-        appliedPromo = null;
-        msg.textContent = '✕ Invalid promo code.';
-        msg.className = 'promo-msg bad';
-      }
-    } catch {
-      msg.textContent = '✕ Could not verify code. Try again.';
-      msg.className = 'promo-msg bad';
-    }
+function backToForm() {
+  $('paySection').style.display = 'none';
+  $('formSection').style.display = 'block';
+  $('order').scrollIntoView({ behavior:'smooth' });
+}
+
+async function handleSubmit() {
+  const mmg = $('mmg').value.trim();
+  let valid = true;
+  $('mmgErr').classList.toggle('on', !mmg); $('mmg').classList.toggle('invalid', !mmg);
+  if (!mmg) valid = false;
+  const tos = $('tosCheck').checked;
+  $('tosErr').classList.toggle('on', !tos);
+  if (!tos) valid = false;
+  if (!valid) { showToast('Please complete all required fields.'); return; }
+
+  const btn = $('submitBtn');
+  btn.classList.add('loading'); btn.disabled = true;
+  const email = $('email').value.trim(), file = $('fileInput').files[0], svc = getService();
+  try {
+    const fd = new FormData();
+    fd.append('name', $('name').value.trim());
+    fd.append('email', email);
+    fd.append('serviceLabel', svc.label);
+    fd.append('servicePrice', svc.price);
+    fd.append('promoCode', appliedPromo ? appliedPromo.code : '');
+    fd.append('priority', $('priorityCheck').checked ? 'true' : 'false');
+    fd.append('paymentMethod', 'mmg');
+    fd.append('mmg', mmg);
+    fd.append('file', file, file.name);
+    const res = await fetch(WORKER_URL + '/submit', { method:'POST', body: fd });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || 'Unknown error');
+    $('formArea').style.display = 'none';
+    $('confirmEmail').textContent = email;
+    $('successScreen').classList.add('on');
+    $('order').scrollIntoView({ behavior:'smooth' });
+  } catch (err) {
+    console.error(err);
+    showToast('Submission failed. Please try again.');
+    btn.classList.remove('loading'); btn.disabled = false;
   }
+}
 
-  function getService() {
-    const sel = document.querySelector('input[name="service"]:checked');
-    if (!sel) return null;
-    return { value: sel.value, price: parseInt(sel.dataset.price), label: sel.dataset.label };
-  }
+/* Terms of Service */
+function setTab(t) {
+  document.querySelectorAll('.tab').forEach(b => b.classList.toggle('on', b.dataset.tab === t));
+  document.querySelectorAll('.tabpane').forEach(p => p.classList.toggle('on', p.dataset.pane === t));
+  document.querySelector('#tosModal .m-body').scrollTop = 0;
+}
+function openTos(e, tab) { if (e) e.preventDefault(); setTab(tab || 'general'); $('tosModal').classList.add('open'); document.body.style.overflow = 'hidden'; }
+function closeTos() { $('tosModal').classList.remove('open'); document.body.style.overflow = ''; }
+function acceptTos() { $('tosCheck').checked = true; $('tosErr').classList.remove('on'); closeTos(); }
 
-  function calcTotal(base) {
-    // Accelerated Results add-on: $500 GYD
-    const accelAddon = document.getElementById('priorityCheck') && document.getElementById('priorityCheck').checked ? 500 : 0;
-    // Processing fee is always added AFTER discount, so it is never discounted
-    const subtotalBeforeDiscount = base + accelAddon;
+/* Stripe overlay: display only, nothing can be entered or submitted */
+function openStripe() { $('stripeModal').classList.add('open'); document.body.style.overflow = 'hidden'; }
+function closeStripe() { $('stripeModal').classList.remove('open'); document.body.style.overflow = ''; }
 
-    let afterDiscount = subtotalBeforeDiscount;
-    let discount = 0;
-    if (appliedPromo) {
-      discount = Math.round(subtotalBeforeDiscount * appliedPromo.discountPct / 100);
-      afterDiscount = subtotalBeforeDiscount - discount;
-    }
-
-    // Add mandatory processing fee AFTER discount (never discounted)
-    const afterFee = afterDiscount + PROCESSING_FEE;
-
-    const useNearestRounding = appliedPromo && appliedPromo.discountPct >= 5;
-    const finalRounded = useNearestRounding ? roundNearest20(afterFee) : roundUpTo20(afterFee);
-    const roundingAdj = finalRounded - afterFee;
-
-    return { final: finalRounded, discount, accelAddon, roundingAdj };
-  }
-
-  function updatePriorityAddon() {
-    if (document.getElementById('paySection').style.display !== 'none') {
-      const svc = getService();
-      if (!svc) return;
-      const { final, discount, accelAddon, roundingAdj } = calcTotal(svc.price);
-
-      document.getElementById('priorityRow').style.display = accelAddon > 0 ? 'flex' : 'none';
-
-      const discRow = document.getElementById('discountRow');
-      if (discount > 0) {
-        document.getElementById('discountAmt').textContent = '-$' + discount + ' GYD';
-        discRow.style.display = 'flex';
-      } else {
-        discRow.style.display = 'none';
-      }
-
-      const roundRow = document.getElementById('roundingRow');
-      if (roundingAdj !== 0) {
-        document.getElementById('roundingAmt').textContent = (roundingAdj > 0 ? '+' : '') + '$' + roundingAdj + ' GYD';
-        roundRow.style.display = 'flex';
-      } else {
-        roundRow.style.display = 'none';
-      }
-
-      document.getElementById('sumTotal').textContent = final;
-      document.getElementById('payExact').textContent = final;
-    }
-  }
-
-  function validate() {
-    let ok = true;
-    const name  = document.getElementById('name').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const svc   = getService();
-    const file  = document.getElementById('fileInput').files[0];
-
-    const err = (id, inputId, show) => {
-      document.getElementById(id).classList.toggle('visible', show);
-      if (inputId) document.getElementById(inputId)?.classList.toggle('invalid', show);
-    };
-
-    if (!name)  { err('nameErr', 'name', true);  ok = false; } else err('nameErr', 'name', false);
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { err('emailErr', 'email', true); ok = false; } else err('emailErr', 'email', false);
-    if (!svc) { document.getElementById('serviceErr').classList.add('visible'); ok = false; } else document.getElementById('serviceErr').classList.remove('visible');
-    if (!file) { document.getElementById('fileErr').classList.add('visible'); fileDrop.classList.add('invalid'); ok = false; } else { document.getElementById('fileErr').classList.remove('visible'); fileDrop.classList.remove('invalid'); }
-    return ok;
-  }
-
-  function proceedToPayment() {
-    if (!validate()) { showToast('Please complete all required fields.', 'error'); return; }
-
-    const name  = document.getElementById('name').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const file  = document.getElementById('fileInput').files[0];
-    const svc   = getService();
-    const { final, discount, accelAddon, roundingAdj } = calcTotal(svc.price);
-
-    document.getElementById('sumName').textContent         = name;
-    document.getElementById('sumEmail').textContent        = email;
-    document.getElementById('sumFile').textContent         = file.name;
-    document.getElementById('sumServiceLabel').textContent = svc.label;
-    document.getElementById('sumBasePrice').textContent    = '$' + svc.price + ' GYD';
-
-    const discRow = document.getElementById('discountRow');
-    if (discount > 0) {
-      document.getElementById('discountAmt').textContent   = '-$' + discount + ' GYD';
-      document.getElementById('discountLabel').textContent = 'Promo (' + appliedPromo.code + ')';
-      discRow.style.display = 'flex';
-    } else {
-      discRow.style.display = 'none';
-    }
-
-    const roundRow = document.getElementById('roundingRow');
-    if (roundingAdj !== 0) {
-      document.getElementById('roundingAmt').textContent = (roundingAdj > 0 ? '+' : '') + '$' + roundingAdj + ' GYD';
-      roundRow.style.display = 'flex';
-    } else {
-      roundRow.style.display = 'none';
-    }
-
-    document.getElementById('priorityRow').style.display = accelAddon > 0 ? 'flex' : 'none';
-
-    document.getElementById('sumTotal').textContent = final;
-    document.getElementById('payExact').textContent = final;
-
-    document.getElementById('formSection').style.display = 'none';
-    document.getElementById('paySection').style.display  = 'block';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
-  function backToForm() {
-    document.getElementById('paySection').style.display  = 'none';
-    document.getElementById('formSection').style.display = 'block';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
-  async function handleSubmit() {
-    const mmg = document.getElementById('mmg').value.trim();
-    let valid = true;
-
-    if (!mmg) {
-      document.getElementById('mmgErr').classList.add('visible');
-      document.getElementById('mmg').classList.add('invalid');
-      valid = false;
-    } else {
-      document.getElementById('mmgErr').classList.remove('visible');
-      document.getElementById('mmg').classList.remove('invalid');
-    }
-
-    if (!document.getElementById('tosCheck').checked) {
-      document.getElementById('tosErr').classList.add('visible');
-      valid = false;
-    } else {
-      document.getElementById('tosErr').classList.remove('visible');
-    }
-
-    if (!valid) {
-      showToast('Please complete all required fields.', 'error');
-      return;
-    }
-
-    const btn = document.getElementById('submitBtn');
-    btn.classList.add('loading');
-    btn.disabled = true;
-
-    const name     = document.getElementById('name').value.trim();
-    const email    = document.getElementById('email').value.trim();
-    const file     = document.getElementById('fileInput').files[0];
-    const svc      = getService();
-    const accel    = document.getElementById('priorityCheck').checked;
-
-    try {
-      const fd = new FormData();
-      fd.append('name',         name);
-      fd.append('email',        email);
-      fd.append('serviceLabel', svc.label);
-      fd.append('servicePrice', svc.price);
-      fd.append('promoCode',    appliedPromo ? appliedPromo.code : '');
-      fd.append('priority',     accel ? 'true' : 'false');
-      fd.append('mmg',          mmg);
-      fd.append('file',         file, file.name);
-
-      const res  = await fetch(WORKER_URL + '/submit', { method: 'POST', body: fd });
-      const data = await res.json();
-
-      if (!data.ok) throw new Error(data.error || 'Unknown error');
-
-      document.querySelector('header').style.display      = 'none';
-      document.getElementById('paySection').style.display = 'none';
-      document.getElementById('confirmEmail').textContent  = email;
-      document.getElementById('successScreen').classList.add('visible');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-
-    } catch (err) {
-      console.error(err);
-      showToast('Submission failed — please try again.', 'error');
-      btn.classList.remove('loading');
-      btn.disabled = false;
-    }
-  }
-
-  // ── ToS Modal ─────────────────────────────────────────────────
-  function openTosModal(e) {
-    if (e) e.preventDefault();
-    document.getElementById('tosModal').classList.add('open');
-    document.body.style.overflow = 'hidden';
-  }
-
-  function closeTosModal() {
-    document.getElementById('tosModal').classList.remove('open');
-    document.body.style.overflow = '';
-  }
-
-  function closeTosModalOnOverlay(e) {
-    if (e.target === document.getElementById('tosModal')) closeTosModal();
-  }
-
-  function acceptTos() {
-    document.getElementById('tosCheck').checked = true;
-    document.getElementById('tosErr').classList.remove('visible');
-    closeTosModal();
-  }
-
-  function showToast(msg, type) {
-    const t = document.getElementById('toast');
-    t.textContent = (type === 'success' ? '✓ ' : '✕ ') + msg;
-    t.className = 'toast ' + type + ' show';
-    setTimeout(() => t.classList.remove('show'), 4000);
-  }
+let toastTimer;
+function showToast(msg) {
+  const t = $('toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 4000);
+}
 </script>
 </body>
 </html>
